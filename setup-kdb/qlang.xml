@@ -1,0 +1,36 @@
+<NotepadPlus>
+    <UserLang name="q" ext="q k">
+        <Settings>
+            <Global caseIgnored="no" />
+            <TreatAsSymbol comment="no" commentLine="no" />
+            <Prefix words1="no" words2="yes" words3="yes" words4="yes" />
+        </Settings>
+        <KeywordLists>
+            <Keywords name="Delimiters">&quot;00&quot;00</Keywords>
+            <Keywords name="Folder+"></Keywords>
+            <Keywords name="Folder-"></Keywords>
+            <Keywords name="Operators">( ) [ ] { }</Keywords>
+            <Keywords name="Comment">1 1 2 2 0/ 0logg 0logd</Keywords>
+            <Keywords name="Words1">abs acos aj aj0 all and any asc asin asize asof atan attr avg avgs bin boolean bsize byte ceiling char cols cor cos count cov cross csv cut date datetime dd delete deltas depth desc dev differ distinct div do each enlist eval except exec exit exp fby fills first fkeys flip float floor from get getenv group gtime hclose hcount hdel hh hopen hsym http iasc idesc if ij in insert int inter inv key keys last like lj load log long lower lsq ltime ltrim mavg max maxs mcount md5 mdev med meta min mins minute mm mmax mmin mmu mod month msum nbbo neg next not null or over parse peach pj plist prd prds prev price quote rand rank ratios raze read0 read1 real reciprocal reverse rload rotate rsave rtrim save scan second select set setenv short show signum sin sqrt ss ssr string sublist sum sums sv symbol system tables tan til time trade trim txf type uj ungroup union update upper upsert value var view views vs wavg week where while within wj wsum xasc xbar xcol xcols xdesc xexp xgroup xkey xlog xprev xrank year</Keywords>
+            <Keywords name="Words2">\d</Keywords>
+            <Keywords name="Words3">`</Keywords>
+            <Keywords name="Words4">.Q.qp</Keywords>
+        </KeywordLists>
+        <Styles>
+            <WordsStyle name="DEFAULT" styleID="11" fgColor="383838" bgColor="FFFFFF" fontName="" fontStyle="0" />
+            <WordsStyle name="FOLDEROPEN" styleID="12" fgColor="800000" bgColor="FFFFFF" fontName="" fontStyle="1" />
+            <WordsStyle name="FOLDERCLOSE" styleID="13" fgColor="800000" bgColor="FFFFFF" fontName="" fontStyle="1" />
+            <WordsStyle name="KEYWORD1" styleID="5" fgColor="0000FF" bgColor="FFFFFF" fontName="" fontStyle="1" />
+            <WordsStyle name="KEYWORD2" styleID="6" fgColor="FF0000" bgColor="FFFFFF" fontName="" fontStyle="0" />
+            <WordsStyle name="KEYWORD3" styleID="7" fgColor="800000" bgColor="FFFFFF" fontName="" fontStyle="0" />
+            <WordsStyle name="KEYWORD4" styleID="8" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" />
+            <WordsStyle name="COMMENT" styleID="1" fgColor="000000" bgColor="008000" fontName="" fontStyle="0" />
+            <WordsStyle name="COMMENT LINE" styleID="2" fgColor="008040" bgColor="FFFFFF" fontName="" fontStyle="0" />
+            <WordsStyle name="NUMBER" styleID="4" fgColor="400000" bgColor="FFFFFF" fontName="" fontStyle="0" />
+            <WordsStyle name="OPERATOR" styleID="10" fgColor="A80054" bgColor="FFFFFF" fontName="" fontStyle="0" />
+            <WordsStyle name="DELIMINER1" styleID="14" fgColor="808000" bgColor="FFFFFF" fontName="" fontStyle="0" />
+            <WordsStyle name="DELIMINER2" styleID="15" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" />
+            <WordsStyle name="DELIMINER3" styleID="16" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" />
+        </Styles>
+    </UserLang>
+</NotepadPlus>

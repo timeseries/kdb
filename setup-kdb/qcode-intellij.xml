@@ -1,0 +1,23 @@
+<filetype binary="false" default_extension="" description="kdb q" name="qcode-intellij">
+  <highlighting>
+    <options>
+      <option name="LINE_COMMENT" value="/" />
+      <option name="COMMENT_START" value="" />
+      <option name="COMMENT_END" value="" />
+      <option name="HEX_PREFIX" value="0x" />
+      <option name="NUM_POSTFIXES" value="i,j,e,f" />
+      <option name="HAS_BRACES" value="true" />
+      <option name="HAS_BRACKETS" value="true" />
+      <option name="HAS_PARENS" value="true" />
+      <option name="HAS_STRING_ESCAPES" value="true" />
+    </options>
+    <keywords keywords="abs;acos;aj;aj0;all;and;any;asc;asin;asize;asof;atan;attr;avg;avgs;bin;boolean;bsize;byte;ceiling;char;cols;cor;cos;count;cov;cross;csv;cut;date;datetime;dd;delete;deltas;depth;desc;dev;differ;distinct;div;do;each;enlist;eval;except;exec;exit;exp;fby;fills;first;fkeys;flip;float;floor;from;get;getenv;group;gtime;hclose;hcount;hdel;hh;hopen;hsym;http;iasc;idesc;if;ij;in;insert;int;inter;inv;key;keys;last;like;lj;load;log;long;lower;lsq;ltime;ltrim;mavg;max;maxs;mcount;md5;mdev;med;meta;min;mins;minute;mm;mmax;mmin;mmu;mod;month;msum;nbbo;neg;next;not;null;or;over;parse;peach;pj;plist;prd;prds;prev;price;quote;rand;rank;ratios;raze;read0;read1;real;reciprocal;reverse;rload;rotate;rsave;rtrim;save;scan;second;select;set;setenv;short;show;signum;sin;sqrt;ss;ssr;string;sublist;sum;sums;sv;symbol;system;tables;tan;til;time;trade;trim;txf;type;uj;ungroup;union;update;upper;upsert;value;var;view;views;vs;wavg;week;where;while;within;wj;wsum;xasc;xbar;xcol;xcols;xdesc;xexp;xgroup;xkey;xlog;xprev;xrank" ignore_case="false" />
+    <keywords2 keywords=".Q.D;.Q.P;.Q.PD;.Q.PV;.Q.V;.Q.addmonths;.Q.addr;.Q.chk;.Q.cn;.Q.dd;.Q.dpft;.Q.dsftg;.Q.en;.Q.fc;.Q.fk;.Q.fmt;.Q.fs;.Q.ft;.Q.gc;.Q.hdpf;.Q.host;.Q.ind;.Q.par;.Q.pd;.Q.pf;.Q.pn;.Q.pv;.Q.qp;.Q.qt;.Q.s;.Q.ty;.Q.u;.Q.v;.Q.view" />
+    <keywords3 keywords=".z.1;.z.D;.z.K;.z.N;.z.P;.z.T;.z.Z;.z.a;.z.ac;.z.b;.z.d;.z.f;.z.h;.z.i;.z.k;.z.l;.z.n;.z.o;.z.p;.z.pc;.z.pg;.z.ph;.z.pi;.z.po;.z.pp;.z.ps;.z.pw;.z.s;.z.t;.z.ts;.z.u;.z.vs;.z.w;.z.x;.z.z" />
+    <keywords4 keywords="\d" />
+  </highlighting>
+  <extensionMap>
+    <mapping ext="k" />
+    <mapping ext="q" />
+  </extensionMap>
+</filetype>

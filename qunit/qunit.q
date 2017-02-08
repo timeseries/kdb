@@ -9,12 +9,19 @@
 / @author TimeStored.com
 / @website http://www.timestored.com/kdb-guides/kdb-regression-unit-tests
 
+/ @TODO mocking projections are broken, add test and fix.
+
 system "d .qunit";
 
 EMPTYAR:`actual`expected`msg!```;
 FAIL: "assertionFailed"; / exception thrown on assertion fail
 
-breakOnExceptions:0b;
+/ Controls where known expected values are loaded from and new results are saved to
+expectedPath:`:expected;
+actualPath:`:actual;
+currentNamespaceBeingTested:`;
+
+debug:0b; / If true then do not run tests protected, i.e. break on assertion failures etc.
 failFlag:0b;
 r:1; / holder for result of \ts speed timing in runTests
 ar:EMPTYAR; / holder for result of last assertion
@@ -22,7 +29,7 @@ ar:EMPTYAR; / holder for result of last assertion
 mocks:{x!x}enlist (::); / dictionary from mock names to their original value etc.
 unsetMocks:`$(); / list of variables that are mocked but were unset beforehand
 
-lg:{a:string[.z.t],$[type[x]=98h; "\r\n"; "  "],$[type[x] in 10 -10h; x; .Q.s x],"\r\n"; l::l,enlist a; 1 a; x};
+lg:{a:string[.z.t],"  ",$[type[x] in 10 -10h; x; .Q.s x],"\r\n"; l::l,enlist a; 1 a; x};
 
 // Assert that the relation between expected and actual value holds
 // @param actual An object representing the actual result value
@@ -34,17 +41,18 @@ assertThat:{ [actual; relation; expected; msg]
     lg $[failFlag; "FAILED"; "passed"]," -> ",msg;
     if[failFlag;
         lg "expected = ",-3!expected;
-        lg "actual = ",-3!actual;
-        ar::`actual`expected`msg!(actual;expected;msg);];
-    if[breakOnExceptions and failFlag; 'FAIL];
+        lg "actual = ",-3!actual;];
+    ar::`actual`expected`msg!(actual;expected;msg);
+    if[failFlag; 'assertThatFAIL];
     actual};
 
 // Make the test fail with given message. Useful for placing in 
 // code areas that should never be ran or for marking incomplete test code.
-fail:{ [msg] failFlag::1b; 
+fail:{ [msg] 
+    failFlag::1b; 
     lg "FAILED -> ",msg;
     ar::`actual`expected`msg!(`fail;`;msg); 
-    `fail};
+    'fail};
             
 // Assert that actual and expected value are equal
 // @param actual An object representing the actual result value
@@ -53,13 +61,24 @@ fail:{ [msg] failFlag::1b;
 // @return actual object
 assertEquals:{ [actual; expected; msg]
     a:actual; e:expected; aTh:assertThat; / shortcuts
+    ar::`actual`expected`msg!(actual;expected;msg);
+    if[a~e; :a];
     if[.Q.qt e;
-        aTh[1b;~; .Q.qt actual;"expected an actual table"];
-        if[not failFlag; aTh[asc cols a; ~; asc cols e;"tables have same columns"]];
-        if[not failFlag; aTh[count a; ~; count e;"tables have same number rows"]];
-        if[not failFlag; assertTrue[all/[a=e];"tables have same data"]];
+        if[failFlag::not .Q.qt actual; '"assertEquals expected an actual table"];
+        if[failFlag::not (asc cols a)~asc cols e; '"assertEquals tables have same columns"];
+        if[failFlag::not (count a)~count e; '"assertEquals tables have same number rows"];
+        if[failFlag::not all/[a=e]; '"assertEquals tables have same data"];
         :a];
     assertThat[a;~;e;msg]};
+
+/ Assert that the expectedFilename in the expectedPath contains a variable
+/ that is equal to actual.
+assertKnown:{ [expectedFilename; actual; msg]   
+    makePath:.Q.dd[;currentNamespaceBeingTested,expectedFilename];
+    e:@[get; makePath expectedPath; {`$"couldNotFindExpectedFilename ",x}];
+    makePath[actualPath] set actual;
+    assertEquals[actual; e; msg] };
+    
 
 // Assert that executing a given function causes an error to be thrown
 // @param func A function that takes a single argument
@@ -72,12 +91,13 @@ assertError:{ [func; arg; msg]
 // Assert that executing a given function causes specific exception to be thrown
 // @param exceptionLike A value that is used to check the likeness of an exception e.g. "type*"
 assertThrows:{ [func; arg; exceptionLike; msg] 
-    assertThat[type func; within; 100 104h; "assertError first arg should be function type within 100 104h. ",msg];
+    ar::`actual`expected`msg!(`noException;`ERR;msg);
+    if[not (type func) within 100 104h; '"assertT first arg should be function type within 100 104h. ",msg];
     r:@[{(1b;x y)}[func;]; arg; {(0b; x)}];
     if[not failFlag;  
-        assertTrue[not r 0; "Function failed.",msg];
-        assertTrue[r[1] like (),exceptionLike; "exception like format expected: ",exceptionLike]];
-    ar::`actual`expected`msg!(r 1;`ERR;msg); 
+        if[failFlag::r 0; '"assertThrows Function never threw exception. ",msg];
+        if[failFlag::not r[1] like (),exceptionLike; "exception like format expected: ",exceptionLike]];
+    ar::`actual`expected`msg!(r 1;`ERR;msg);
     r 1};
     
 // assert that actual is true
@@ -92,7 +112,9 @@ assertTrue:{ [actual; msg]  assertThat[actual;=;1b; msg]};
 runTests:{ [nsList] 
     l::("  ";"   ");
     lg "\r\n"; lg "########## .qunit.runTests `",("`" sv string (),nsList)," ##########";
-    a:raze runNsTests each (),nsList;
+    / no namespaces specified, find all ending with test
+    nsl:$[11h~abs type nsList; nsList; `$".",/:string a where (lower a:key `) like "*test"]; 
+    a:raze runNsTests each (),nsl;
     lg $[count a; update namespace:nsList from a; 'noTestsFound]};
 
 / find functions with a certain name pattern within the selected namespace
@@ -111,6 +133,7 @@ run:{@[value lg x;::;{'lg "setUpError",x}]};
 / @param ns symbol specifying a single namespace to test e.g. `.mytests
 runNsTests:{ [ns]
     if[not (ns~`.) or (`$1_string ns) in key `; 'nsNoExist]; // can't find namespace
+    currentNamespaceBeingTested::ns;
     ff:findFuncs[ns;;1b];
     run each ff "beforeNamespace*";
     testList: ff "test*";
@@ -132,6 +155,7 @@ runTest:{ [fn]
     validTest:$[100h~type vFn:value fn; $[1~count (value vFn) 1; 1b; 0b]; 0b];
     if[not validTest; :(0b;0b;"test should be single arg function")];
     failFlag:: 0b;
+    ar::EMPTYAR;
     // run setUp*
     ns:();
     if[2<=sum "."=a:string fn; 
@@ -139,16 +163,16 @@ runTest:{ [fn]
         run each findFuncs[ns;"setUp*";0b]];
     // run actual test
 /   r:@[{(1b; value[x] y)}[fn;]; ::; {(0b;x)}]; / safer non escaping version.
-    r:value "{a:system \"ts .qunit.r:@[{(1b; value[`",string[fn],"] x)}; ::; {(0b;x)}];\"; `ran`result`time`mem!.qunit.r,a}[]";
+    r:value "{a:system \"ts .qunit.r:@[{(1b; value[`",string[fn],"] x)}; ::",$[debug;"";"; {(0b;x)}"],"];\"; `ran`result`time`mem!.qunit.r,a}[]";
     if[not r `ran; lg "test threw exception"];
     if[count ns; run each findFuncs[ns;"tearDown*";0b]];
     // cleanup dict format
-    r[`status]: $[not r `ran; `error; $[failFlag; `fail; `pass]];
-    r,:$[failFlag; ar; EMPTYAR],`maxTime`maxMem#getConf fn; / show last assert on failure
+    r[`status]: $[failFlag; `fail; $[not r `ran; `error; `pass]];
+    r,:ar,`maxTime`maxMem#getConf fn; / show last assert on failure
     if[not[failFlag] and any r[`time`mem]>r`maxTime`maxMem;
         r[`status`msg]:(`fail;"exceeeded max config time/mem")];
     `ran _ r};    
-    
+
 mock:{ [name; val]
     r:@[{(1b;value x)}; name;00b];
     / if variable has an existing value

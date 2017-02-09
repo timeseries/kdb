@@ -8,6 +8,7 @@
 / .
 / @author TimeStored.com
 / @website http://www.timestored.com/kdb-guides/kdb-regression-unit-tests
+/ © TimeStored - Free for non-commercial use.
 
 / @TODO mocking projections are broken, add test and fix.
 
@@ -218,3 +219,39 @@ reset:{ [names]
     emptyDict:{x!x}enlist (::);
     mocks::emptyDict,k _ 1 _ mocks; / the sentinal causes remove problems
     n };
+
+
+
+//########## REPORTING FUNCTIONALITY ############ - Work in Progress
+
+/ Generate an HTML report displaying the results of a test run
+/ @param runTestsResult - Table returned from runTests
+/ @param path - symbol - specifying locatin that HTML file is saved to
+/ @param configDict - dictionary - to pass additional config at a later date (included now for backwards compatibility)
+generateReport:{ [path; runTestsResult; configDict]
+    f:hopen @[hdel; path; path];
+    / body:toHtml each runTestsResult;
+    f "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" > <head><meta http-equiv=\"content-type\" content=\"text/html; charset=iso-8859-1\" />";
+    f "<style>tr.fail { background:red } td, th { padding:.1em; border:1px solid gray; }  table { border:1px solid gray; border-collapse:collapse; }</style>";
+    f "<title>qUnit Tests</title></head><body><div id='inner'>";
+    f "<h1><a href='http://www.timestored.com/kdb-guides/kdb-regression-unit-tests'>qUnit</a> Tests</h1>";
+    f formatTable runTestsResult;
+    testToHtml:{ [f; testDict]
+        f "<hr /><h2>",string[testDict`name],"</h2><p>",testDict[`msg],"</p>";
+        f "<h4>Actual</h4>",format[testDict`actual],"<h4>Expected</h4>",format[testDict`expected]; 
+        };
+    testToHtml[f;] each select from runTestsResult where status=`fail;
+    f "</div> <div class='footer'><p><a href='http://www.timestored.com/kdb-guides/kdb-regression-unit-tests'>qUnit</a> | <a href='http://www.TimeStored.com/'>TimeStored.com</a> | <a href='http://www.timestored.com/kdb-training/'>kdb+ Training</a> </p></div></body></html>";
+    hclose f;
+    };
+
+/ Display an HTML table
+formatTable:{  [t]
+    w:{ a:string[x],">"; l:y,"<",a; r:"</",a; l,((r,l) sv z),r};
+    header:.h.htc[`tr;]  w[`th;"\t";string cols t];
+    flatten:({"\t" sv x} each {.h.htc[`td;] .h.hc $[10h=type a:string x; a; .Q.s1 x]}'');
+    content:"\r\n" sv {.h.htac[`tr; enlist[`class]!enlist `asads; x] } each flatten flip value flip t;
+    .h.htc[`table;] (.h.htc[`thead;] header),content}; 
+
+/ Display any kdb object as HTML
+format:{ [o]  $[.Q.qt o; formatTable o; .Q.s o]};

@@ -134,7 +134,7 @@ run:{@[value lg x;::;{'lg "setUpError",x}]};
 / @param ns symbol specifying a single namespace to test e.g. `.mytests
 runNsTests:{ [ns]
     if[not (ns~`.) or (`$1_string ns) in key `; 'nsNoExist]; // can't find namespace
-    currentNamespaceBeingTested::ns;
+    currentNamespaceBeingTested::{$["."=first a:string x; `$1 _ a; x]} ns;
     ff:findFuncs[ns;;1b];
     run each ff "beforeNamespace*";
     testList: ff "test*";
@@ -171,7 +171,7 @@ runTest:{ [fn]
     r[`status]: $[failFlag; `fail; $[not r `ran; `error; `pass]];
     r,:ar,`maxTime`maxMem#getConf fn; / show last assert on failure
     if[not[failFlag] and any r[`time`mem]>r`maxTime`maxMem;
-        r[`status`msg]:(`fail;"exceeeded max config time/mem")];
+        r[`status`msg]:(`fail;"exceeded max config time/mem")];
     `ran _ r};    
 
 mock:{ [name; val]
@@ -221,7 +221,6 @@ reset:{ [names]
     n };
 
 
-
 //########## REPORTING FUNCTIONALITY ############ - Work in Progress
 
 / Generate an HTML report displaying the results of a test run
@@ -229,29 +228,31 @@ reset:{ [names]
 / @param path - symbol - specifying locatin that HTML file is saved to
 / @param configDict - dictionary - to pass additional config at a later date (included now for backwards compatibility)
 generateReport:{ [path; runTestsResult; configDict]
+    / expand console size to allow full display of data for diffs
+    origC:system "c";
+    system "c 2000 2000";
     f:hopen @[hdel; path; path];
-    / body:toHtml each runTestsResult;
-    f "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" > <head><meta http-equiv=\"content-type\" content=\"text/html; charset=iso-8859-1\" />";
-    f "<style>tr.fail { background:red } td, th { padding:.1em; border:1px solid gray; }  table { border:1px solid gray; border-collapse:collapse; }</style>";
-    f "<title>qUnit Tests</title></head><body><div id='inner'>";
-    f "<h1><a href='http://www.timestored.com/kdb-guides/kdb-regression-unit-tests'>qUnit</a> Tests</h1>";
-    f formatTable runTestsResult;
+    f "<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' ><head><meta http-equiv='content-type' content='text/html; charset=iso-8859-1' /><title>Index Listing - TimeStored.com</title><link rel='stylesheet' href='http://www.timestored.com/css/qunit.css' type='text/css' media='screen' /><link rel='shortcut icon' type='image/png' href='http://www.timestored.com/favicon.png' /></head><body><div id='wrap'><div id='page'><div id='header'><h2><a class='qlogo' href='http://www.timestored.com/kdb-guides/kdb-regression-unit-tests?utm_source=qunitrun&utm_medium=app&utm_campaign=qunitrun' target='a'>q<span>Unit</span></a> - <a target='a' href='http://www.timestored.com'>TimeStored.com</a></h2></div><div id='main'>";
+    f formatTable update cssClass:status from delete actual,expected,result,msg from runTestsResult;
     testToHtml:{ [f; testDict]
-        f "<hr /><h2>",string[testDict`name],"</h2><p>",testDict[`msg],"</p>";
-        f "<h4>Actual</h4>",format[testDict`actual],"<h4>Expected</h4>",format[testDict`expected]; 
+        f "<div class='qtest'><h2>",string[testDict`name],"</h2><p>",testDict[`msg],"</p>";
+        f "<textarea class='actual'>",.Q.s[testDict`actual],"</textarea>";
+        f "<textarea class='expected'>",.Q.s[testDict`expected],"</textarea></div>";
         };
     testToHtml[f;] each select from runTestsResult where status=`fail;
-    f "</div> <div class='footer'><p><a href='http://www.timestored.com/kdb-guides/kdb-regression-unit-tests'>qUnit</a> | <a href='http://www.TimeStored.com/'>TimeStored.com</a> | <a href='http://www.timestored.com/kdb-training/'>kdb+ Training</a> </p></div></body></html>";
+    f "<h2>Log</h2><textarea class='log'>";
+    f each 2 _ .qunit.l;
+    f "</textarea>";
+    f "<script src='http://www.timestored.com/js/qunit.js'></script></div><div id='footer'> <p>&copy; 2013 <a class='qlogo' href='http://www.timestored.com/kdb-guides/kdb-regression-unit-tests?utm_source=qunitrun&utm_medium=app&utm_campaign=qunitrun' target='a'>q<span>Unit</span></a> | <a target='a' href='http://www.timestored.com'>TimeStored.com</a> | <a target='a' href='http://www.timestored.com/kdb-training?utm_source=qunitrun&utm_medium=app&utm_campaign=qunitrun'>KDB Training</a> | <a target='a' href='http://www.timestored.com/contact?utm_source=qunitrun&utm_medium=app&utm_campaign=qunitrun'>Contact Us</a></p></div></div></div>";
     hclose f;
+    system "c "," " sv string origC;
     };
 
-/ Display an HTML table
-formatTable:{  [t]
+/ Display a kdb table as HTML, using cssClass column for css class in HTML
+formatTable:{  [tbl]
+    t:() xkey tbl;
     w:{ a:string[x],">"; l:y,"<",a; r:"</",a; l,((r,l) sv z),r};
-    header:.h.htc[`tr;]  w[`th;"\t";string cols t];
-    flatten:({"\t" sv x} each {.h.htc[`td;] .h.hc $[10h=type a:string x; a; .Q.s1 x]}'');
-    content:"\r\n" sv {.h.htac[`tr; enlist[`class]!enlist `asads; x] } each flatten flip value flip t;
+    header:.h.htc[`tr;]  w[`th;"\t";string (cols t) except `cssClass];
+    flattr:{"\t " sv  {.h.htc[`td;] .h.hc $[10h=type a:string x; a; .Q.s1 x]} each x};
+    content:"\r\n" sv {.h.htac[`tr; enlist[`class]!enlist x`cssClass; flattr value `cssClass _ x] } each t;
     .h.htc[`table;] (.h.htc[`thead;] header),content}; 
-
-/ Display any kdb object as HTML
-format:{ [o]  $[.Q.qt o; formatTable o; .Q.s o]};

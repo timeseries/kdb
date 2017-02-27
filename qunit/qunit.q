@@ -8,7 +8,6 @@
 / .
 / @author TimeStored.com
 / @website http://www.timestored.com/kdb-guides/kdb-regression-unit-tests
-/ © TimeStored - Free for non-commercial use.
 
 / @TODO mocking projections are broken, add test and fix.
 
@@ -30,7 +29,7 @@ ar:EMPTYAR; / holder for result of last assertion
 mocks:{x!x}enlist (::); / dictionary from mock names to their original value etc.
 unsetMocks:`$(); / list of variables that are mocked but were unset beforehand
 
-lg:{a:string[.z.t],$[type[x]=98h; "\r\n"; "  "],$[type[x] in 10 -10h; x; .Q.s x],"\r\n"; l::l,enlist a; 1 a; x};
+lg:{a:string[.z.t],"  ",$[type[x] in 10 -10h; x; .Q.s x],"\r\n"; l::l,enlist a; 1 a; x};
 
 // Assert that the relation between expected and actual value holds
 // @param actual An object representing the actual result value
@@ -72,14 +71,19 @@ assertEquals:{ [actual; expected; msg]
         :a];
     assertThat[a;~;e;msg]};
 
-/ Assert that the expectedFilename in the expectedPath contains a variable
-/ that is equal to actual.
-assertKnown:{ [expectedFilename; actual; msg]   
-    makePath:.Q.dd[;currentNamespaceBeingTested,expectedFilename];
-    e:@[get; makePath expectedPath; {`$"couldNotFindExpectedFilename ",x}];
-    makePath[actualPath] set actual;
-    assertEquals[actual; e; msg] };
-    
+// Assert that the expectedFilename in the expectedPath contains a variable
+// that is equal to actual.
+// @param expectedFilename - Symbol - With filename containing binary kdb data with expected result.
+assertKnown:{ [actual; expectedFilename; msg]
+    .Q.dd[actualPath;currentNamespaceBeingTested,fn] set actual;
+    assertEquals[actual; getKnown expectedFilename; msg] };
+
+// Get a known binary file.
+// @param expectedFilename - Symbol - With filename containing binary kdb data with expected result.
+getKnown:{ [expectedFilename]
+    fn:$[":"=first p:string expectedFilename; `$ 1 _ p; p];
+    f:.Q.dd[expectedPath;currentNamespaceBeingTested,fn];
+    @[get; f; {`$"couldNotFindExpectedFilename ",x}]};
 
 // Assert that executing a given function causes an error to be thrown
 // @param func A function that takes a single argument
@@ -116,7 +120,7 @@ runTests:{ [nsList]
     / no namespaces specified, find all ending with test
     nsl:$[11h~abs type nsList; nsList; `$".",/:string a where (lower a:key `) like "*test"]; 
     a:raze runNsTests each (),nsl;
-    lg $[count a; update namespace:nsList from a; 'noTestsFound]};
+    lg $[count a; a; 'noTestsFound]};
 
 / find functions with a certain name pattern within the selected namespace
 / @logEmpty If set to true write to log that no funcs found otherwise stay silent
@@ -140,7 +144,7 @@ runNsTests:{ [ns]
     testList: ff "test*";
     c: runTest each  testList;
     run each ff "afterNamespace*";
-    $[count c; `status`name`result`actual`expected`msg`time`mem xcols update name:testList from c; ()] };
+    $[count c; `status`name`result`actual`expected`msg`time`mem xcols update namespace:ns,name:testList from c; ()] };
     
 / for fully specified test function in namespace get its config dictionary.
 getConf:{ [fn]     
@@ -225,9 +229,8 @@ reset:{ [names]
 
 / Generate an HTML report displaying the results of a test run
 / @param runTestsResult - Table returned from runTests
-/ @param path - symbol - specifying locatin that HTML file is saved to
-/ @param configDict - dictionary - to pass additional config at a later date (included now for backwards compatibility)
-generateReport:{ [path; runTestsResult; configDict]
+/ @param path - symbol - specifying location that HTML file is saved to e.g. `:html/qunit.html
+generateReport:{ [runTestsResult; path]
     / expand console size to allow full display of data for diffs
     origC:system "c";
     system "c 2000 2000";
@@ -253,6 +256,8 @@ formatTable:{  [tbl]
     t:() xkey tbl;
     w:{ a:string[x],">"; l:y,"<",a; r:"</",a; l,((r,l) sv z),r};
     header:.h.htc[`tr;]  w[`th;"\t";string (cols t) except `cssClass];
-    flattr:{"\t " sv  {.h.htc[`td;] .h.hc $[10h=type a:string x; a; .Q.s1 x]} each x};
-    content:"\r\n" sv {.h.htac[`tr; enlist[`class]!enlist x`cssClass; flattr value `cssClass _ x] } each t;
+    toTabRow:{
+        flattr:{"\t " sv  {.h.htc[`td;] .h.hc $[10h=type a:string x; a; .Q.s1 x]} each x};
+        .h.htac[`tr; enlist[`class]!enlist x`cssClass; flattr value `cssClass _ x] };
+    content:"\r\n" sv toTabRow each t;
     .h.htc[`table;] (.h.htc[`thead;] header),content}; 

@@ -8,6 +8,7 @@
 / .
 / @author TimeStored.com
 / @website http://www.timestored.com/kdb-guides/kdb-regression-unit-tests
+/ © TimeStored - Free for non-commercial use.
 
 / @TODO mocking projections are broken, add test and fix.
 
@@ -29,7 +30,7 @@ ar:EMPTYAR; / holder for result of last assertion
 mocks:{x!x}enlist (::); / dictionary from mock names to their original value etc.
 unsetMocks:`$(); / list of variables that are mocked but were unset beforehand
 
-lg:{a:string[.z.t],"  ",$[type[x] in 10 -10h; x; .Q.s x],"\r\n"; l::l,enlist a; 1 a; x};
+lg:{a:string[.z.t],$[type[x]=98h; "\r\n"; "  "],$[type[x] in 10 -10h; x; .Q.s x],"\r\n"; l::l,enlist a; 1 a; x};
 
 // Assert that the relation between expected and actual value holds
 // @param actual An object representing the actual result value

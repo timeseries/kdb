@@ -8,6 +8,7 @@
 / .
 / @author TimeStored.com
 / @website http://www.timestored.com/kdb-guides/kdb-regression-unit-tests
+/ © TimeStored - Free for non-commercial use.
 
 / @TODO mocking projections are broken, add test and fix.
 
@@ -71,14 +72,20 @@ assertEquals:{ [actual; expected; msg]
         :a];
     assertThat[a;~;e;msg]};
 
-/ Assert that the expectedFilename in the expectedPath contains a variable
-/ that is equal to actual.
-assertKnown:{ [expectedFilename; actual; msg]   
-    makePath:.Q.dd[;currentNamespaceBeingTested,expectedFilename];
-    e:@[get; makePath expectedPath; {`$"couldNotFindExpectedFilename ",x}];
-    makePath[actualPath] set actual;
-    assertEquals[actual; e; msg] };
-    
+// Assert that the expectedFilename in the expectedPath contains a variable
+// that is equal to actual.
+// @param expectedFilename - Symbol - With filename containing binary kdb data with expected result.
+assertKnown:{ [actual; expectedFilename; msg]
+    fn:`$$[":"=first p:string expectedFilename; 1 _ p; p];
+    .Q.dd[actualPath;currentNamespaceBeingTested,fn] set actual;
+    assertEquals[actual; getKnown expectedFilename; msg] };
+
+// Get a known binary file.
+// @param expectedFilename - Symbol - With filename containing binary kdb data with expected result.
+getKnown:{ [expectedFilename]
+    fn:`$$[":"=first p:string expectedFilename; 1 _ p; p];
+    f:.Q.dd[expectedPath;currentNamespaceBeingTested,fn];
+    @[get; f; {`$"couldNotFindExpectedFilename ",x}]};
 
 // Assert that executing a given function causes an error to be thrown
 // @param func A function that takes a single argument
@@ -115,7 +122,7 @@ runTests:{ [nsList]
     / no namespaces specified, find all ending with test
     nsl:$[11h~abs type nsList; nsList; `$".",/:string a where (lower a:key `) like "*test"]; 
     a:raze runNsTests each (),nsl;
-    lg $[count a; update namespace:nsList from a; 'noTestsFound]};
+    lg $[count a; a; 'noTestsFound]};
 
 / find functions with a certain name pattern within the selected namespace
 / @logEmpty If set to true write to log that no funcs found otherwise stay silent
@@ -133,13 +140,13 @@ run:{@[value lg x;::;{'lg "setUpError",x}]};
 / @param ns symbol specifying a single namespace to test e.g. `.mytests
 runNsTests:{ [ns]
     if[not (ns~`.) or (`$1_string ns) in key `; 'nsNoExist]; // can't find namespace
-    currentNamespaceBeingTested::ns;
+    currentNamespaceBeingTested::{$["."=first a:string x; `$1 _ a; x]} ns;
     ff:findFuncs[ns;;1b];
     run each ff "beforeNamespace*";
     testList: ff "test*";
     c: runTest each  testList;
     run each ff "afterNamespace*";
-    $[count c; `status`name`result`actual`expected`msg`time`mem xcols update name:testList from c; ()] };
+    $[count c; `status`name`result`actual`expected`msg`time`mem xcols update namespace:ns,name:testList from c; ()] };
     
 / for fully specified test function in namespace get its config dictionary.
 getConf:{ [fn]     
@@ -170,7 +177,7 @@ runTest:{ [fn]
     r[`status]: $[failFlag; `fail; $[not r `ran; `error; `pass]];
     r,:ar,`maxTime`maxMem#getConf fn; / show last assert on failure
     if[not[failFlag] and any r[`time`mem]>r`maxTime`maxMem;
-        r[`status`msg]:(`fail;"exceeeded max config time/mem")];
+        r[`status`msg]:(`fail;"exceeded max config time/mem")];
     `ran _ r};    
 
 mock:{ [name; val]
@@ -218,3 +225,41 @@ reset:{ [names]
     emptyDict:{x!x}enlist (::);
     mocks::emptyDict,k _ 1 _ mocks; / the sentinal causes remove problems
     n };
+
+
+//########## REPORTING FUNCTIONALITY ############ - Work in Progress
+
+/ Generate an HTML report displaying the results of a test run
+/ @param runTestsResult - Table returned from runTests
+/ @param path - symbol - specifying location that HTML file is saved to e.g. `:html/qunit.html
+generateReport:{ [runTestsResult; path]
+    / expand console size to allow full display of data for diffs
+    origC:system "c";
+    system "c 2000 2000";
+    f:hopen @[hdel; path; path];
+    f "<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' ><head><meta http-equiv='content-type' content='text/html; charset=iso-8859-1' /><title>qUnit Run - TimeStored.com</title><link rel='stylesheet' href='http://www.timestored.com/css/qunit.css' type='text/css' media='screen' /><link rel='shortcut icon' type='image/png' href='http://www.timestored.com/favicon.png' /></head><body><div id='wrap'><div id='page'><div id='header'><h2><a class='qlogo' href='http://www.timestored.com/kdb-guides/kdb-regression-unit-tests?utm_source=qunitrun&utm_medium=app&utm_campaign=qunitrun' target='a'>q<span>Unit</span></a> - <a target='a' href='http://www.timestored.com'>TimeStored.com</a></h2></div><div id='main'>";
+    f formatTable update cssClass:status from delete actual,expected,result,msg from runTestsResult;
+    testToHtml:{ [f; testDict]
+        f "<div class='qtest'><h2>",string[testDict`name],"</h2><p>",testDict[`msg],"</p>";
+        f "<textarea class='actual'>",.Q.s[testDict`actual],"</textarea>";
+        f "<textarea class='expected'>",.Q.s[testDict`expected],"</textarea></div>";
+        };
+    testToHtml[f;] each select from runTestsResult where status=`fail;
+    f "<h2>Log</h2><textarea class='log'>";
+    f each 2 _ .qunit.l;
+    f "</textarea>";
+    f "<script src='http://www.timestored.com/js/qunit.js'></script></div><div id='footer'> <p>&copy; 2013 <a class='qlogo' href='http://www.timestored.com/kdb-guides/kdb-regression-unit-tests?utm_source=qunitrun&utm_medium=app&utm_campaign=qunitrun' target='a'>q<span>Unit</span></a> | <a target='a' href='http://www.timestored.com'>TimeStored.com</a> | <a target='a' href='http://www.timestored.com/kdb-training?utm_source=qunitrun&utm_medium=app&utm_campaign=qunitrun'>KDB Training</a> | <a target='a' href='http://www.timestored.com/contact?utm_source=qunitrun&utm_medium=app&utm_campaign=qunitrun'>Contact Us</a></p></div></div></div>";
+    hclose f;
+    system "c "," " sv string origC;
+    };
+
+/ Display a kdb table as HTML, using cssClass column for css class in HTML
+formatTable:{  [tbl]
+    t:() xkey tbl;
+    w:{ a:string[x],">"; l:y,"<",a; r:"</",a; l,((r,l) sv z),r};
+    header:.h.htc[`tr;]  w[`th;"\t";string (cols t) except `cssClass];
+    toTabRow:{
+        flattr:{"\t " sv  {.h.htc[`td;] .h.hc $[10h=type a:string x; a; .Q.s1 x]} each x};
+        .h.htac[`tr; enlist[`class]!enlist x`cssClass; flattr value `cssClass _ x] };
+    content:"\r\n" sv toTabRow each t;
+    .h.htc[`table;] (.h.htc[`thead;] header),content}; 

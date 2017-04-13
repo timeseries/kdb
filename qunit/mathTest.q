@@ -29,6 +29,16 @@ testGetFactorial:{
            
 / to set a max time we use the qunitconfig
 / a dictionary from test names to test parameters to their values
-testGetFactorialSpeed:{ .math.getFactorial each 10+100000?10;};
+testGetFactorialSpeed:{ max .math.getFactorial each 10+100000?10 };
 qunitConfig:``!();
 qunitConfig[`testGetFactorialSpeed]:`maxTime`maxMem!(100;20000000);  
+
+
+testSubComparedToFile:{ .qunit.assertKnown[0; `testSubComparedToFile; "2 minus 2 equals zero"] };
+
+testTableOfData:{
+    t:([] v:til 12);
+    t:update areaOfCircle:.math.getAreaofCircle v, factorial:.math.getFactorial each v, tiller:til each v from t;
+    .qunit.assertKnown[t; `testTableOfData; "calc match known table"] };
+        
+testExceptionShownInUnitTests:{  'throwMe };

@@ -76,13 +76,14 @@ assertEquals:{ [actual; expected; msg]
 // that is equal to actual.
 // @param expectedFilename - Symbol - With filename containing binary kdb data with expected result.
 assertKnown:{ [actual; expectedFilename; msg]
+    fn:`$$[":"=first p:string expectedFilename; 1 _ p; p];
     .Q.dd[actualPath;currentNamespaceBeingTested,fn] set actual;
     assertEquals[actual; getKnown expectedFilename; msg] };
 
 // Get a known binary file.
 // @param expectedFilename - Symbol - With filename containing binary kdb data with expected result.
 getKnown:{ [expectedFilename]
-    fn:$[":"=first p:string expectedFilename; `$ 1 _ p; p];
+    fn:`$$[":"=first p:string expectedFilename; 1 _ p; p];
     f:.Q.dd[expectedPath;currentNamespaceBeingTested,fn];
     @[get; f; {`$"couldNotFindExpectedFilename ",x}]};
 
@@ -236,7 +237,7 @@ generateReport:{ [runTestsResult; path]
     origC:system "c";
     system "c 2000 2000";
     f:hopen @[hdel; path; path];
-    f "<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' ><head><meta http-equiv='content-type' content='text/html; charset=iso-8859-1' /><title>Index Listing - TimeStored.com</title><link rel='stylesheet' href='http://www.timestored.com/css/qunit.css' type='text/css' media='screen' /><link rel='shortcut icon' type='image/png' href='http://www.timestored.com/favicon.png' /></head><body><div id='wrap'><div id='page'><div id='header'><h2><a class='qlogo' href='http://www.timestored.com/kdb-guides/kdb-regression-unit-tests?utm_source=qunitrun&utm_medium=app&utm_campaign=qunitrun' target='a'>q<span>Unit</span></a> - <a target='a' href='http://www.timestored.com'>TimeStored.com</a></h2></div><div id='main'>";
+    f "<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' ><head><meta http-equiv='content-type' content='text/html; charset=iso-8859-1' /><title>qUnit Run - TimeStored.com</title><link rel='stylesheet' href='http://www.timestored.com/css/qunit.css' type='text/css' media='screen' /><link rel='shortcut icon' type='image/png' href='http://www.timestored.com/favicon.png' /></head><body><div id='wrap'><div id='page'><div id='header'><h2><a class='qlogo' href='http://www.timestored.com/kdb-guides/kdb-regression-unit-tests?utm_source=qunitrun&utm_medium=app&utm_campaign=qunitrun' target='a'>q<span>Unit</span></a> - <a target='a' href='http://www.timestored.com'>TimeStored.com</a></h2></div><div id='main'>";
     f formatTable update cssClass:status from delete actual,expected,result,msg from runTestsResult;
     testToHtml:{ [f; testDict]
         f "<div class='qtest'><h2>",string[testDict`name],"</h2><p>",testDict[`msg],"</p>";

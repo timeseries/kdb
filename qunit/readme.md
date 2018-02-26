@@ -45,6 +45,7 @@ Qunit provides methods for asserting that the output of a function was valid. If
 | Name       |	        Description                    |
 |------------------|-------------------------------------------|
 assertEquals[actual; expected; msg] |	Assert that actual and expected value are equal. |
+assertKnown:[actual; expectedFilename; msg] | Assert that actual matches the binary data in the expectedFilename. |
 assertThat[actual; relation; expected; msg]	| Assert that the relation between expected and actual value holds |
 assertTrue[actual; msg]	| Assert that actual is true |
 assertError[func; arg; msg]	| Assert that executing a given function causes an error to be thrown |

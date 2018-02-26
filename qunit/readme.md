@@ -161,3 +161,44 @@ The result of running tests is a table with one row for each test. The table wil
     mem - The memory in bytes that the test took to run.
     maxTime - The maximium time in milliseconds that the test is allowed to run, else it would fail.
     maxMem - The maximium memory in bytes that the test is allowed to run, else it would fail.
+
+
+Parameters
+-----------------------------------------------
+
+Have you ever wanted to run the same tests but with a variety of configurations. In junit you use [parameterized tests](https://github.com/junit-team/junit4/wiki/parameterized-tests).  qUnit allows for a similar concept using .ns.parameters[] function to provide a list of the various configurations permitted.
+
+Within your test namespace you can define a function e.g. ``.mathTest.parameters`` that returns a list for example with the values:(1 2;3 4). The test framework will then do 2 full runs of the tests. Once with ``.mathTest.parameter:1 2;`` and once with ``.mathTest.parameter:3 4;``. From each test you should access that parameter. The qunit result will contain a row for each test run and an additional column called parameter, saying what the configuration was when ran.
+
+Special Methods:
+
+| Name Prefix      |	        Description                    |
+|------------------|-------------------------------------------|
+| parameters | Function that returns a list of the various parameters to use. |
+| beforeParameters* | Code that will be ran once, before any tests. |
+| afterParameters*  | Code that will be ran once, after all tests have been ran. |
+
+Note: The before/afterNamespace calls will now be ran before/after each parameterised run.
+
+### Example Run
+```
+22:20:42.619  ########## .qunit.runTests `:: ##########
+22:20:42.619  `.mathParametersTest.parameters
+22:20:42.619  parameters = ((2 2;4);(1 5;6))
+22:20:42.619  parameter = (2 2;4)
+22:20:42.620  beforeNamespace* found: `
+22:20:42.620  test* found: `testAdd
+22:20:42.620  #### .qunit.runTest `.mathParametersTest.testAdd
+22:20:42.620  afterNamespace* found: `
+22:20:42.620  parameter = (1 5;6)
+22:20:42.620  beforeNamespace* found: `
+22:20:42.620  test* found: `testAdd
+22:20:42.620  #### .qunit.runTest `.mathParametersTest.testAdd
+22:20:42.620  afterNamespace* found: `
+22:20:42.620
+status name                        result actual expected msg                ..
+-----------------------------------------------------------------------------..
+pass   .mathParametersTest.testAdd 4      4      4        "Adding gives expec..
+pass   .mathParametersTest.testAdd 6      6      6        "Adding gives expec..
+
+```

@@ -122,8 +122,10 @@ runTests:{ [nsList]
     / no namespaces specified, find all ending with test
     nsl:$[11h~abs type nsList; nsList; `$".",/:string a where (lower a:key `) like "*test"]; 
     a:raze runNsTests each (),nsl;
-    lg $[count a; a; 'noTestsFound]};
-
+    if[0=count a; 'noTestsFound];
+    // if no parameters actually used, remove the column
+    lg $[all ()~/:a`parameter; delete parameter from a; a]};
+        
 / find functions with a certain name pattern within the selected namespace
 / @logEmpty If set to true write to log that no funcs found otherwise stay silent
 findFuncs:{ [ns; pattern; logEmpty]
@@ -142,10 +144,23 @@ runNsTests:{ [ns]
     if[not (ns~`.) or (`$1_string ns) in key `; 'nsNoExist]; // can't find namespace
     currentNamespaceBeingTested::{$["."=first a:string x; `$1 _ a; x]} ns;
     ff:findFuncs[ns;;1b];
-    run each ff "beforeNamespace*";
-    testList: ff "test*";
-    c: runTest each  testList;
-    run each ff "afterNamespace*";
+    run each findFuncs[ns;"beforeParameters*";0b];
+    pFunc:first findFuncs[ns;"parameters*";0b];
+    pVals:$[0<count pFunc; @[run;pFunc;()]; ()];
+    if[count pVals; lg "parameters = ",-3!pVals];
+    idx:0;
+    c:();
+    do[max 1,count pVals;
+        if[count pVals; lg "parameter = ",-3!pVals idx];
+        @[ns;`parameter;:;pVals idx];
+        run each ff "beforeNamespace*";
+        testList: ff "test*";
+        runRes: runTest each  testList;
+        runRes:update parameter:(count testList)#enlist pVals idx from runRes;
+        c,:runRes;
+        run each ff "afterNamespace*";
+        idx+:1];
+    run each findFuncs[ns;"afterParameters*";0b];
     $[count c; `status`name`result`actual`expected`msg`time`mem xcols update namespace:ns,name:testList from c; ()] };
     
 / for fully specified test function in namespace get its config dictionary.

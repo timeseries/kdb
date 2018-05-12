@@ -78,6 +78,7 @@ assertEquals:{ [actual; expected; msg]
 assertKnown:{ [actual; expectedFilename; msg]
     fn:`$$[":"=first p:string expectedFilename; 1 _ p; p];
     .Q.dd[actualPath;currentNamespaceBeingTested,fn] set actual;
+    .Q.dd[actualPath;currentNamespaceBeingTested,`$string[fn],".txt"] 0: enlist .Q.s actual;
     assertEquals[actual; getKnown expectedFilename; msg] };
 
 // Get a known binary file.

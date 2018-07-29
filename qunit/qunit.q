@@ -41,13 +41,13 @@ lg:{a:string[.z.t],$[type[x]=98h; "\r\n"; "  "],$[type[x] in 10 -10h; x; .Q.s x]
 // @param msg Description of this test or related message
 // @return actual object
 assertThat:{ [actual; relation; expected; msg]
-    failFlag::not .[relation; (actual; expected); 0b];
-    lg $[failFlag; "FAILED"; "passed"]," -> ",msg;
-    if[failFlag;
+    relationPassed:.[relation; (actual; expected); 0b];
+    lg $[relationPassed; "passed"; "FAILED"]," -> ",msg;
+    if[not relationPassed;
         lg "expected = ",-3!expected;
         lg "actual = ",-3!actual;];
     ar::`actual`expected`msg!(actual;expected;msg);
-    if[failFlag; 'assertThatFAIL];
+    doCheck[relationPassed;"assertThatFAIL"];
     actual};
 
 // Make the test fail with given message. Useful for placing in 
@@ -58,6 +58,7 @@ fail:{ [msg]
     ar::`actual`expected`msg!(`fail;`;msg); 
     'fail};
 
+/ If checkPassed is false, set the failFlag and possibly throw an exception.
 doCheck:{ [checkPassed; failMsg] 
     failFlag::failFlag or not checkPassed;
     if[failFlag and not .qunit.ignoreAllExceptions;
@@ -110,7 +111,7 @@ assertKnownRun:{ [func; arg]
 getKnown:{ [expectedFilename]
     fn:`$$[":"=first p:string expectedFilename; 1 _ p; p];
     f:.Q.dd[expectedPath;currentNamespaceBeingTested,fn];
-    @[get; f; {`$"couldNotFindExpectedFilename ",x}]};
+    @[get; f; {$[.qunit.ignoreAllExceptions;`;`$"couldNotFindExpectedFilename ",x]}]};
 
 // Assert that executing a given function causes an error to be thrown
 // @param func A function that takes a single argument

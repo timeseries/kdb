@@ -21,8 +21,11 @@ FAIL: "assertionFailed"; / exception thrown on assertion fail
 expectedPath:`:expected;
 actualPath:`:actual;
 currentNamespaceBeingTested:`;
+currentTestBeingTested:`;
 
 debug:0b; / If true then do not run tests protected, i.e. break on assertion failures etc.
+ignoreAllExceptions:0b; / Useful to generate all actual results. i.e. Set 1b, run all tests, copy actual to expected, Set 0b.
+
 failFlag:0b;
 r:1; / holder for result of \ts speed timing in runTests
 ar:EMPTYAR; / holder for result of last assertion
@@ -54,6 +57,11 @@ fail:{ [msg]
     lg "FAILED -> ",msg;
     ar::`actual`expected`msg!(`fail;`;msg); 
     'fail};
+
+doCheck:{ [checkPassed; failMsg] 
+    failFlag::failFlag or not checkPassed;
+    if[failFlag and not .qunit.ignoreAllExceptions;
+        'failMsg];};
             
 // Assert that actual and expected value are equal
 // @param actual An object representing the actual result value
@@ -65,10 +73,10 @@ assertEquals:{ [actual; expected; msg]
     ar::`actual`expected`msg!(actual;expected;msg);
     if[a~e; :a];
     if[.Q.qt e;
-        if[failFlag::not .Q.qt actual; '"assertEquals expected an actual table"];
-        if[failFlag::not (asc cols a)~asc cols e; '"assertEquals tables have same columns"];
-        if[failFlag::not (count a)~count e; '"assertEquals tables have same number rows"];
-        if[failFlag::not all/[a=e]; '"assertEquals tables have same data"];
+        doCheck[.Q.qt actual; "assertEquals expected an actual table"];
+        doCheck[(asc cols a)~asc cols e; "assertEquals tables have same columns"];
+        doCheck[(count a)~count e; "assertEquals tables have same number rows"];
+        doCheck[all/[a=e]; "assertEquals tables have same data"];
         :a];
     assertThat[a;~;e;msg]};
 
@@ -80,6 +88,22 @@ assertKnown:{ [actual; expectedFilename; msg]
     .Q.dd[actualPath;currentNamespaceBeingTested,fn] set actual;
     .Q.dd[actualPath;currentNamespaceBeingTested,`$string[fn],".txt"] 0: enlist .Q.s actual;
     assertEquals[actual; getKnown expectedFilename; msg] };
+    
+assertKnownRun:{ [func; arg]
+    cleanName:{
+        / cope with very long queries as -3 truncates according to console
+        originalc:system "c";
+        system "c 2000 2000";
+        st:ssr[;"=";"_equals_"] ssr[;">";"_gt_"] -3!x;
+        system "c "," " sv string originalc;
+        / If st>33 characters add md5 and truncate.
+        st:(-6#"" sv string md5 st),"-",44 sublist st;
+        st:{@[x;where not lower[x] in .Q.an;:;"_"]} st;
+        st:ssr[;"__";"_"] ssr[;"__";"_"] ssr[;"__";"_"] st;
+        st};
+    testName:string (` vs .qunit.currentTestBeingTested) 2;
+    expectedFilename:testName,"_",cleanName (func;arg);
+    assertKnown[value (func;arg); hsym `$expectedFilename; "knownRun:",-3!(func;arg)]};
 
 // Get a known binary file.
 // @param expectedFilename - Symbol - With filename containing binary kdb data with expected result.
@@ -100,11 +124,11 @@ assertError:{ [func; arg; msg]
 // @param exceptionLike A value that is used to check the likeness of an exception e.g. "type*"
 assertThrows:{ [func; arg; exceptionLike; msg] 
     ar::`actual`expected`msg!(`noException;`ERR;msg);
-    if[not (type func) within 100 104h; '"assertT first arg should be function type within 100 104h. ",msg];
+    doCheck[(type func) within 100 104h; "assertT first arg should be function type within 100 104h. ",msg];
     r:@[{(1b;x y)}[func;]; arg; {(0b; x)}];
     if[not failFlag;  
-        if[failFlag::r 0; '"assertThrows Function never threw exception. ",msg];
-        if[failFlag::not r[1] like (),exceptionLike; "exception like format expected: ",exceptionLike]];
+        doCheck[not r 0; "assertThrows Function never threw exception. ",msg];
+        doCheck[r[1] like (),exceptionLike; "exception like format expected: ",exceptionLike]];
     ar::`actual`expected`msg!(r 1;`ERR;msg);
     r 1};
     
@@ -174,6 +198,7 @@ getConf:{ [fn]
 / @return dictionary of test success/failure, name, result etc.
 runTest:{ [fn]
     lg "#### .qunit.runTest `",string fn;
+    currentTestBeingTested::fn;
     // check single arg function
     validTest:$[100h~type vFn:value fn; $[1~count (value vFn) 1; 1b; 0b]; 0b];
     if[not validTest; :(0b;0b;"test should be single arg function")];

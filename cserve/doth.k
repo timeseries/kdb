@@ -11,7 +11,7 @@
 
 LOGQUERIES:1b; / log to console query details
 HIDDENNS:`q`h`man`Q`o`os`dbm`pd`html`j; / name spaces not to list in the menu
-RUNNER:(::); / function used to run queries.
+RUNNER:.:; / function used to run queries.
 id:0;
 
 / need unique id's for some things
@@ -90,7 +90,7 @@ getCodemirrorJs:{ [textAreaId; editable; mode]
 
 / run the supplied q query and return html showing its code and result	
 runAndShowQry:{ [qry] 
-	res:$[~0=#qry; @[.:; ("(1;",qry,")"); {(0;x)}]; ()];
+	res:$[~0=#qry; @[{(1;.h.RUNNER x)}; qry; {(0;x)}]; ()];
 	PRE:"<form id='myForm' class='boxy' action=''><label>Query: <textarea rows='2' cols='20' id='query'>";
 	POST:"</textarea> </label></form>Result:",getCodemirrorJs["query";0b;`q];
 	$[#res; ,/PRE,qry,POST,"<div class='boxy",($[res 0;"'>";"err'>Error! "]),($res[1]),"</div><hr/>"; ""]};	
@@ -138,7 +138,7 @@ getJStype:{$[""~a:qTypeToJStype[`$x];"string";a]};
 
 
 formatGoogVis: { [query]
-	tabVal:.: .h.uh $[0N ~ c:(last query ss "&tqx="); query; c#query];
+	tabVal:.h.RUNNER .h.uh $[0N ~ c:(last query ss "&tqx="); query; c#query];
 	reqId: $[~: 0N ~ c:(last query ss "&tqx=reqId:"); "I"$ (c+11)_query; ~: 0N ~ c:(last query ss "&tqx=reqId%3A"); "I"$ (c+13)_query; 0];
 	logg ,/ "reqId = ",($: reqId),"  query = ",$: query;
 	t:{select c, {, getJStype[x]}' t from 0!.q.meta x} tabVal;
@@ -161,7 +161,7 @@ htmlForDataTable:{HEADER,x,FOOTER};
 / v is the data itself (e.g. 1 2 3 or {1+x}
 getSimpleAsHTML:{ [x; showEditor] 
 	/ check param is actual variable or value
-	res:@[.:; ("(1;",x,")"); {(0;x)}]
+	res:@[{(1;.h.RUNNER x)}; x; {(0;x)}]
 	v:res 1;
 	isSimple:{within[@x;(-19;19)] | within[@x;(99;112)] & (0b~.Q.qt x)};
 	if[(~res 0) | ~isSimple v; :()]; / if problems return empty
@@ -180,7 +180,7 @@ getSimpleAsHTML:{ [x; showEditor]
 / but if a statement, showEditor MUST be false
 getVarAsHTML:{ [x; showEditor]
 		logg "getVarAsHTML ",x,"   showEditor=",$:showEditor;
-		$[#r:getSimpleAsHTML[x; showEditor]; r; {@[{,/ formatTable subblist[0,(*."\\C"); x] };x;he]}[.: x] ]};
+		$[#r:getSimpleAsHTML[x; showEditor]; r; {@[{,/ formatTable subblist[0,(*."\\C"); x] };x;he]}[.h.RUNNER x] ]};
 	
 / ############ listing code - makes pretty hierachical menu #############################
 
@@ -263,12 +263,13 @@ showNice:{ ::;
 
 / paginate table entries
 / x is the query itself (no ? etc.) e.g. "10 20 sublist dailyTable", "tableB"...
-paginate:{[x;j]
+/ v is the value of the item
+paginate:{[x;j;v]
 	k:j + N:(*."\\C");
 	logg "paginate -> j = ",($: j),"  k = ",$: k;
 	genQuery:{,/"?e=",y,$[~x=0;"&amp;o=",$(x); ""]}[;x];
 	a:$[N<n:."k)#",x; htac[`ul;(,"class")!,("pagin")]@(" "/:{htc[`li]@ha[x;y]}'[genQuery@/:(0;0|j-N),|&\(n-N;j+N);$`home`up`down`end],,($j),"-",($k)," of ",($n);"");()];
-	,/a,:,formatPTable[subblist[j,N; . x]; . x]};	
+	,/a,:,formatPTable[subblist[j,N; v]; v]};	
 	
 	
 / given the name of a table, show the table for its meta
@@ -278,13 +279,14 @@ getMetaTab:{
 		attrs:(`href`onclick)!(,"#";,/funcName,"('",$tab,"','",col,"'",otherArgs,");");
 		htac[`a;attrs;"<img src='images/",imgName,".png' />",txt," "]}[x];
 	lnk:jLnk[""];
-	.q.meta (a:.: x)};
+	.q.meta (a:.h.RUNNER x)};
 
 / tab displayed when user clicks on tree menu	
 pageDict[`$"i.qhtml"]:{ [args]
 	e:$[0=#args[`e]; "1"; args[`e]];
 	o:$[0=#args[`o]; 0j; "J"$args[`o]];
-	subTitles:$[.Q.qt[.: e]; ("Data";"Meta")!("Data";"Meta"); ()!()];
+    v:.h.RUNNER e;
+	subTitles:$[.Q.qt[v]; ("Data";"Meta")!("Data";"Meta"); ()!()];
 	p:$[0=#subTitles[args[`p]]; "Data"; args[`p]]; / default page
 	logg ,/,/ "i.qhtml p=",($p)," e=",($e)," o=",$o;
 	a:, "<h1>",($e),"</h1>";
@@ -292,8 +294,8 @@ pageDict[`$"i.qhtml"]:{ [args]
 			
 	/ was some kind of q query sent
 	res:runAndShowQry[args[`qry]];
-	a,:,$[p~"Data"; "<div id='iqhtml'><p>",$[.Q.qt[.: e]; paginate[e;o]; getVarAsHTML[e;1b]],"</div>"
-		p~"Meta"; res,"<p>",(tableDesc (.: e)),"</p>",formatTable[getMetaTab e]
+	a,:,$[p~"Data"; "<div id='iqhtml'><p>",$[.Q.qt[v]; paginate[e;o;v]; getVarAsHTML[e;0b]],"</div>"
+		p~"Meta"; res,"<p>",(tableDesc (v)),"</p>",formatTable[getMetaTab e]
 		""];
 	,/ a}
 
@@ -310,7 +312,7 @@ pageDict[`$"i.qhtml"]:{ [args]
   "?]"~2#x; getVarAsHTML[2_x; 0b]     / raw result for ajax tables
   "?"=*x ; hy[`htm]htmlForDataTable@getVarAsHTML[1_x; 0b]
   ~: ""~dynaPage:getPage[x]; hy[`htm]  dynaPage / if in dictionary of dynamic pages return result
-  "?"in x; @[{hy[t]@`/:tx[t:`$-3#n#x]@.(1+n:x?"?")_x};x;he]
+  "?"in x; @[{hy[t]@`/:tx[t:`$-3#n#x]@ .h.RUNNER (1+n:x?"?")_x};x;he]
   #r:@[1::;`$":",p:HOME,"/",x;""]; $[isHtml[x]; hy; CACHEDHEADER] [`$(1+x?".")_x; "c"$r]
     hn["404 Not Found";`txt]p,": not found"]};
 
@@ -323,6 +325,7 @@ pageDict[`$"i.qhtml"]:{ [args]
 .h.ty[`html]:"text/html"
 .h.ty[`jsn]:"application/json"
 .h.tx[`gjs]:{, .h.formatGoogVis  x}
+
 
 .h.formatGoogVis "([] a:1 2 3; b:`p`o`i)";
 .h.formatGoogVis "([]%20name:(%22aa%22;%22bb%22;%22cc%22);%20a:3?10.0)&tqx=reqId%3A1";

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Online Chart</title>
+<style type="text/css">@import 'style.css';</style>
+<style type="text/css">@import 'codemirror.css';</style>
+<script type="text/javascript" src="codemirror.js"></script>
+ <script type="text/javascript" src="google-jsapi.js"></script>
+ 
+</head>
+<body id='chart'>
+
+
+<h1>Online Chart</h1>
+<div id="inner"><ul id="tablist"><li><a href="chart.html">Time Series charts</a></li><li><a href="chart-online.html" id="current">Online vis charts</a></li></ul></div>
+
+
+<div id="graphout" ><div id="graphdiv"></div></div>
+
+<form id='myForm' class='boxy' name="myForm" action="err.asp" onsubmit="redrawChart(); return false" method="post">
+
+	<label FOR="chartType">Chart Type: 
+	<select name="chartType" id="chartType" onchange="updateAdvice()">
+		<option value="candlestick" selected="selected">Candlestick</option>
+		<option value="treemap">Treemap</option>
+		<option value="pie">Pie</option>
+		<option value="bar">Bar</option>
+		<option value="column">Column</option>
+		<option value="scatter">Scatter</option>
+		<option value="area">Area</option>
+	</select>
+	</label>
+	<button type="button"  id="getExample" name="getExample" value="getExample1" onclick='getExampleQuery();redrawChart();'>Get Example</button>
+	<br/>
+	<br/>
+	
+	<label FOR="query">Query: 
+	<textarea rows="2" cols="20"  name="query" id="query" style="width:530px">([] string .z.d+til n; n?20.0; 20.0+n?20.0; 40.0+n?20.0; 60.0+(n:20)?20.0)</textarea>
+	</label>
+<br/>
+	<input type="submit" value="Submit">
+
+	<label FOR="autorefresh">Autorefresh 
+	<input type="checkbox" id="autorefresh" name="autorefresh" value="autorefresh" onclick='autoRefresh()'>
+	</label>
+	
+	<div style="float:right;">
+		<label>Download</label> 
+		<button type="button" onmouseup="download('csv')">CSV</button>
+		<button type="button" onmouseup="download('xml')">XML</button>
+	</div>
+</form>
+
+<h2>Data Format / Interface</h2>
+<div id='dataFormatExplain'><p>(Mouse over to highlight individual values. Click and drag to zoom. 
+Double-click to zoom back out. Change the number and hit enter to adjust the averaging period.)</p></div>
+
+<div class='footer'><p><a href='http://www.timestored.com/kdb-guides/kdb-keyword-reference'>Function List</a> | <a href='http://www.timestored.com/kdb-guides/'>kdb Tutorials</a></p></div>
+
+<script type="text/javascript">
+
+	google.load('visualization', '1', {'packages': ['table', 'map', 'corechart']});
+      google.load("visualization", "1", {packages:["treemap"]});
+
+	google.setOnLoadCallback(redrawChart);
+	  
+	  
+	var myCodeMirror = CodeMirror.fromTextArea(document.getElementById("query"), {
+        lineNumbers: true,
+        matchBrackets: true,
+        indentUnit: 4,
+		tabMode: "default",
+        mode: "text/x-plsql"
+      });
+	  
+	/* lookup data structure for the various chart types */
+	var lookup = {};
+	lookup.pie={
+		func:function getNew(arg) {return new google.visualization.PieChart(arg) }, 
+		advice:"<p>Two columns. The first column should be a string, and contain the slice label. The second column should be a number, and contain the slice value.</p>", 
+		exampleQuery:"([] name:(\"books\";\"cars\";\"house\"); a:3?10.0)"};
+		
+	lookup.candlestick={
+		func:function getNew(arg) {return new google.visualization.CandlestickChart(arg) }, 
+		advice:"<p>Five columns, where each row describes a single candlestick marker:<ol><li>Category (String)</li>"
+			+ "<li>Low (Number)</li><li>Open (Number)</li><li>Close (Number)</li><li>High (Number)</li></ol></p>", 
+		exampleQuery:"([] string .z.d+til n; n?20.0; 20.0+n?20.0; 40.0+n?20.0; 60.0+(n:20)?20.0)"};
+		
+	lookup.column={
+		func:function getNew(arg) {return new google.visualization.ColumnChart(arg) }, 
+		advice:"<p>The first column in the table should be a string, and represents the label of that group of bars. Any number"
+			+ " of columns can follow, all numeric, each representing the bars with the same color and relative position in each group.</p>", 
+		exampleQuery:"([] title:`2006`2007`2008`2009`2010; sales:5?50.0; expenses:5?100.0)"};
+		
+	lookup.bar={
+		func:function getNew(arg) {return new google.visualization.BarChart(arg) }, 
+		advice:"<p>The first column in the table should be a string, and represents the label of that group of bars. Any number"
+			+ " of columns can follow, all numeric, each 		representing the bars with the same color and relative position in each group.</p>", 
+		exampleQuery:"([] title:`2006`2007`2008`2009`2010; sales:5?50.0; expenses:5?100.0)"};
+		
+	lookup.treemap={
+		func:function getNew(arg) {return new google.visualization.TreeMap(arg) }, 
+		advice:"<p>Four columns:<ol><li>Node (String)</li>"
+			+ "<li>Parent Node (String)</li><li>Size (Number)</li><li>Color (Number)</li></ol>"
+			+ "</p><p>The default behavior is to move down the tree when a user left-clicks a node, and to move back up the tree when a user right-clicks the graph.</p>", 
+		exampleQuery:"([] node:`global`america`europe`asia,10?`3; parent:``global`global`global,10?`america`europe`asia; vals:0 0 0 0f,10?20.0; color:0 0 0 0f,10?20.0)"};
+		
+	lookup.scatter={
+		func:function getNew(arg) {return new google.visualization.ScatterChart(arg) }, 
+		advice:"Two or more columns are required, all must be numeric. The values in the first column are used for"
+			+ " the X-axis. The values in following columns are used for the Y-axis. Each column is displayed with a separate color. ",
+		exampleQuery:"([] age:15 + til 20; weight:40 + (1.0 + 20?2.0) * til 20)"};
+		
+	lookup.area={
+		func:function getNew(arg) {return new google.visualization.AreaChart(arg) }, 
+		advice:"<p><ol><li>Column 0 - [string] The category label. </li><li>Column 1�N [number] You can have"
+			+ " any number of numeric columns after the first string column. Each numeric column represents a separate series in the chart.</li></ol></p>",
+		exampleQuery:"([] title:`2006`2007`2008`2009`2010; sales:5?50.0; expenses:5?100.0)"};
+		
+	  
+	 /** return the selected lookup */
+	function getLookup() {
+		var selectDrop = document.getElementById('chartType');
+		var name = selectDrop.options[selectDrop.selectedIndex].value;
+		return lookup[name];
+	};
+	  
+	function updateAdvice() {
+		document.getElementById("dataFormatExplain").innerHTML = getLookup().advice;
+	};
+	  
+	function getExampleQuery() {
+		// document.getElementById("query").value = getLookup().exampleQuery;
+		myCodeMirror.setValue(getLookup().exampleQuery);
+	};
+	  
+	function draw(response) {
+		if (response.isError()) {
+		  alert('Error in query');
+		}
+		var data = response.getDataTable();
+
+		
+		var selectDrop = document.getElementById('chartType');
+		var name = selectDrop.options[selectDrop.selectedIndex].value;
+		
+		var chart = lookup[name].func(document.getElementById('graphdiv'));
+		
+		chart.draw(data, {width: 700, height: 330, title: '', legend:'right'});
+	};
+		  
+	function redrawChart() {
+		myCodeMirror.save();
+		var query = new google.visualization.Query(".gjs?" + myCodeMirror.getValue());
+		query.setQuery('');
+		query.send(draw);
+	};
+
+	function download(type) {
+		myCodeMirror.save();
+		window.location.href = 'file.' + type + '?'+document.getElementById("query").value;
+	};
+	
+	function autoRefresh() {
+		if(document.getElementById("autorefresh").checked) {
+			redrawChart();
+			setTimeout("autoRefresh()",3000);
+		}
+	};
+	
+</script>
+	
+</body>
+</html>

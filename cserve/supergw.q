@@ -53,7 +53,8 @@
     show "reval";
     reval (value;qCode)};
 
-system "l cserve.q";        
+sys:{system 0N!"l ",x};
+sys each ("html.q";"doth.k";"cserve.q");
 X:(::;::);
 .z.pg:{X::X,enlist x; .supergw.smartEval x};
 .supergw.refreshMetaData[];

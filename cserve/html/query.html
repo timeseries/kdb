@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Query Manager</title>
+<style type="text/css">@import 'style.css';</style>
+<style type="text/css">@import 'codemirror.css';</style>
+<script type="text/javascript" src="sortable.js"></script>
+<script type="text/javascript" src="codemirror.js"></script>
+</head>
+<body id='queryManager'>
+
+<h1>Query Manager</h1>
+<form id='myForm' class='boxy' name="myForm" action="" onsubmit="redrawQuery(); return false" method="post">
+	<label FOR="query">Query: 
+	<textarea rows="2" cols="20"  name="query" id="query" style="width:530px">([] sym:n?`3; qty:n?20; price:(n:10)?100.0)</textarea>
+	</label>
+	<input type="submit" value="Submit">
+
+	<label FOR="autorefresh">Autorefresh 
+	<input type="checkbox" id="autorefresh" name="autorefresh" value="autorefresh" onclick='autoRefresh()'>
+	</label> 
+	<div style="float:right">
+		<label>Download</label> 
+		<button type="button" onmouseup="download('csv')">CSV</button>
+		<button type="button" onmouseup="download('xml')">XML</button>
+		<button type="button" onmouseup="download('xls')">Excel</button>
+		<br/>
+		<label>Benchmark</label> 
+		<button type="button" onmouseup="benchByLine()">By Line</button>
+	</div>
+		<br style="clear:both; display:block; zoom:1;"/>
+</form>
+
+
+	
+<div id='qresults'></div>
+
+<div class='footer'><p><a href='http://www.timestored.com/kdb-guides/kdb-keyword-reference'>Function List</a> | <a href='http://www.timestored.com/kdb-guides/'>kdb Tutorials</a></p></div>
+
+<script type="text/javascript">
+
+
+	function redrawQuery(target) {
+		myCodeMirror.save();
+		ajax('/?]'+escape(document.getElementById("query").value), 'qresults');
+		sortables_init();
+	};
+
+	function download(type) {
+		myCodeMirror.save();
+		window.location.href = 'file.' + type + '?'+escape(document.getElementById("query").value);
+	};
+
+	function benchByLine() {
+		myCodeMirror.save();
+		ajax('/?]' + escape('.h.benchByLine("'+document.getElementById("query").value +'")'), 'qresults');
+		sortables_init();
+	};
+
+
+	function autoRefresh() {
+		if(document.getElementById("autorefresh").checked) {
+			redrawQuery();
+			setTimeout("autoRefresh()",3000);
+		}
+	};
+
+
+	var myCodeMirror = CodeMirror.fromTextArea(document.getElementById("query"), {
+        lineNumbers: true,
+        matchBrackets: true,
+        indentUnit: 4,
+		tabMode: "default",
+        mode: "text/x-plsql"
+      });
+	redrawQuery();
+</script>
+
+</body>
+</html>

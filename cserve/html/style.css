@@ -1,0 +1,516 @@
+body { 
+	width:95%; 
+	margin: 20px 11px;  
+}
+
+
+body {
+	text-decoration: none;  
+	color: #333;
+}
+
+h1,h2,h3,h4 {
+    color: #2580A2;
+    margin:1px;
+}
+
+h1 {
+    font: bold 22pt tahoma, sans-serif;
+    border-bottom: 2px solid #047;
+	margin: 20px auto;
+    }
+
+h2 {
+	width: 80%;
+    border-bottom: 1px solid #047;
+	margin: 6px auto 6px 0;
+    }
+	
+
+/******************** FOOTER CSS *******************/
+
+.footer  {
+	margin: 120px 0 5px;
+	padding:0;
+    border-top: 1px solid #047;
+    border-right: 1px solid #047;
+    border-left: 1px solid #047;
+    border-bottom: 1px solid #047;
+	background: #D0D0FF;
+	color:#2580A2;
+	text-align:center;
+}
+
+.footer  p { 
+	padding:2px;
+	margin:0;
+	text-align:center;
+}
+
+
+.footer  a, .footer a:hover, .footer a:focus, .footer a:active {
+	color: #2580A2;
+}	
+	
+/******************** data result containers *******************/
+
+body#dataRes {
+}
+
+
+body#dataRes #inner {
+	
+}
+
+/********************   Pagination   ***********************/
+.pagin{
+margin: 0 0 8px 0;
+padding: 2px;
+}
+
+.pagin ul{
+margin: 0;
+padding: 0;
+text-align: left; /*Set to "right" to right align pagin interface*/
+font-size: 16px;
+}
+
+.pagin li{
+list-style-type: none;
+display: inline;
+padding-bottom: 1px;
+}
+
+.pagin a, .pagin a:visited{
+padding: 0 5px;
+border: 1px solid #9aafe5;
+text-decoration: none; 
+color: #2e6ab1;
+}
+
+.pagin a:hover, .pagin a:active{
+border: 1px solid #2b66a5;
+color: #000;
+background-color: #FFFF80;
+}
+
+.pagin a.currentpage{
+background-color: #2e6ab1;
+color: #FFF !important;
+border-color: #2b66a5;
+font-weight: bold;
+cursor: default;
+}
+
+.pagin a.disablelink, .pagin a.disablelink:hover{
+background-color: white;
+cursor: default;
+color: #929292;
+border-color: #929292;
+font-weight: normal !important;
+}
+
+.pagin a.prevnext{
+font-weight: bold;
+}
+
+/******************** Table *******************/
+td, th { color:#222;
+ padding:.1em;
+border:1px gray;
+}
+
+/******************** sortable *******************/
+
+table.sortable  { 
+ border:1px solid gray;
+ border-collapse:collapse;
+ color:#fff;
+ font:normal 10px verdana, arial, helvetica, sans-serif;
+}
+.sortable caption { border:1px solid #5C443A;
+ color:#5C443A;
+ font-weight:bold;
+ letter-spacing:20px;
+ padding:6px 4px 8px 0px;
+ text-align:center;
+ text-transform:uppercase;
+}
+.sortable td, .sortable th { color:#363636;
+ padding:.4em;
+border:1px dotted gray;
+}
+.sortable tr { border:1px dotted gray;
+}
+
+.sortable th { color:#FFFFFF; }
+
+.sortable thead th a, .sortable tfoot th a{ text-decoration:none; 
+ color:#FFFFFF;}
+a img { border :0}
+.sortable thead th, .sortable tfoot th { background:#226CAE;
+ padding:3px 10px 3px 10px;
+ text-align:left;
+border:1px solid gray;
+}
+
+/** keyed / attributed columns styling **/
+col.atts, col.attg, col.attp, col.attu { border: 1px solid #AAAAAA;}
+col.atts { border-color: #F00;}
+col.attp { border-color: #0F0;}
+col.attu { border-color: #FD4;}
+col.attg { border-color: #00F;}
+col.key {  border-right: 2px solid #000000;}
+
+.sortable tbody td a { 
+ color:#22A;
+ text-decoration:none;
+ padding:0 5px 0 0;
+}
+
+.sortable tbody td a:hover { text-decoration:underline;
+}
+
+
+.sortable tbody th a { color:#363636;
+ font-weight:normal;
+ text-decoration:none;
+}
+.sortable tbody th a:hover { color:#363636;
+}
+
+.sortable tbody th,.sortable  tbody td { text-align:left;
+ vertical-align:top;
+}
+.sortable tfoot td { background:#fff;
+ color:#FFFFFF;
+ padding-top:3px;
+}
+.odd {  background:#D3E4E5;
+}
+.sortable tbody tr:hover { background:#FFFF44;
+ border:1px solid #222222;
+ color:#000000;
+}
+
+.sortable  a {
+	color:#00F;
+}
+
+/******************** LISTING CSS *******************/
+
+html {
+height:98%;
+	border-right: 1px solid #229;
+	width: auto;
+}
+
+body#listing { 
+	margin:0;
+	background: #D0D0FF; 
+	font-size:80%;  
+	width: auto;
+}
+
+body#listing,#listing  a, #listing a:hover, #listing a:focus, #listing a:active {
+	text-decoration: none;  
+	color: #222;
+}
+
+h1#logo {
+text-align:center; 
+margin: 22px 0 20px 0;
+}
+
+h1#logo a ,h1#logo a:hover,h1#logo a:active,h1#logo a:focus { 
+font-size:20pt; 
+color:#2580A2;
+margin: 0;
+padding:0;
+text-decoration:none;}
+
+#shortcuts {
+ text-align:center; 
+ border-bottom: 1px solid #778;
+ padding-bottom: 5px;
+ margin: 0 0 5px 0;
+}
+#shortcuts a {
+ margin: 3px;
+}
+
+#logo span { color:#25A230; }
+
+
+a:hover {
+	text-decoration: underline;
+}
+	
+#listing #treemenu1  {
+padding:0;
+	margin-left:15px;
+}
+
+#listing ul { 
+margin: 0;
+padding: 0;
+}
+
+.treeview ul{ /*CSS for Simple Tree Menu*/
+margin: 0;
+padding: 0;
+}
+
+.treeview li{ /*Style for LI elements in general (excludes an LI that contains sub lists)*/
+background: url(images/var.gif) no-repeat left center;
+list-style-type: none;
+padding-left: 18px;
+margin-bottom: 3px;
+}
+
+
+.treeview li.typlist{ 
+	color:#000055; 
+	font-weight:bold;
+}
+
+.treeview li.typtime, .treeview li.typmonth, .treeview li.typminute, .treeview li.typsecond, .treeview li.typdate, 
+.treeview li.typdatetime, .treeview li.typtimespan, .treeview li.typtimestamp { 
+	background: url(images/typdate.png) no-repeat left center;
+}
+
+.treeview li.typsymbol, .treeview li.typchar { 
+	background: url(images/typstring.gif) no-repeat left center;
+}
+
+
+.treeview li.tbl{ 
+background: url(images/tbl.gif) no-repeat left center;
+}
+
+.treeview li.vw{ 
+background: url(images/view.png) no-repeat left center;
+}
+.treeview li.func{ 
+background: url(images/function.png) no-repeat left center;
+}
+.treeview li.internal{ 
+background: url(images/reddot.png) no-repeat left center;
+}
+
+.treeview li.var{ 
+background: url(images/var.gif) no-repeat left center;
+}
+
+.treeview li.submenu{ /* Style for LI that contains sub lists (other ULs). */
+background: url(closed.gif) no-repeat left 1px;
+cursor: hand !important;
+cursor: pointer !important;
+}
+
+
+.treeview li.submenu ul{ /*Style for ULs that are children of LIs (submenu) */
+display: none; /*Hide them by default. Don't delete. */
+}
+
+.treeview .submenu ul li{ /*Style for LIs of ULs that are children of LIs (submenu) */
+cursor: default;
+}
+
+/***********************************    navcontainer    - a horizontal list based CSS menu  - blue bar across width of screen**/
+
+#navcontainer ul
+{
+padding: 1px;
+margin: 0 0 15px 0;
+background-color: #036;
+color: White;
+float: left;
+width: 100%;
+font-family: arial, helvetica, sans-serif;
+}
+
+#navcontainer ul li { display: inline; }
+
+#navcontainer ul li a
+{
+padding: 0.1em 1em;
+background-color: #036;
+color: White;
+text-decoration: none;
+float: left;
+border-right: 1px solid #fff;
+}
+
+#navcontainer ul li a:hover
+{
+background-color: #369;
+color: #fff;
+}
+
+/***********************************    tabbed pane effect for a list **/
+#tablist {
+padding: 4px 0;
+margin: 25px 0 10px 0;
+border-bottom: 1px solid #778;
+font: bold 12px Verdana, sans-serif;
+}
+
+#tablist img { vertical-align:bottom;}
+#tablist li {
+list-style: none;
+margin: 0;
+display: inline;
+text-align:center;
+}
+
+#tablist li a
+{
+padding: 4px 0.5em;
+margin-left: 3px;
+border: 1px solid #778;
+border-bottom: none;
+background: #DDE;
+text-decoration: none;
+}
+
+#tablist li a:link { color: #448; }
+#tablist li a:visited { color: #667; }
+
+#tablist li a:hover
+{
+color: #000;
+background: #AAE;
+border-color: #227;
+}
+
+#tablist li a#current
+{
+background: white;
+border-bottom: 1px solid white;
+}
+
+/***********************************       CHART.html  **/
+
+body#chart { }
+
+#chart #explain {
+	font-size:0.8em;
+}
+
+#chart #graphdiv {
+margin: 3px;
+}
+
+#chart #graphout {
+margin: 10px 0;
+padding:5px;
+border: 1px solid #444; 
+width:720px; 
+height:340px;
+}
+
+
+.boxy {
+background:#DDF;
+border:1px solid #AAF;
+width: 700px;
+padding: 5px 10px 5px 10px;
+}
+
+.boxyerr {
+background:#FEE;
+border:1px solid #FAA;
+width: 700px;
+padding: 5px 10px 5px 10px;
+}
+
+/***********************************       QUERY.html  **/
+
+#qresults {
+margin:20px auto;
+}
+
+
+
+
+
+
+/***********************************       DROPDOWN **/
+
+.dropr  li {
+	list-style:none;
+}
+
+.dropr  li img {
+	padding:0 4px 0 0;
+}
+
+.dropr ul {
+	margin:0;
+	padding:0;
+}
+.dropr ul a{
+	white-space:nowrap;
+}
+
+.dropr ul  ul li{
+	padding:4px;
+	margin:2px 0;
+}
+
+.dropr ul  ul{
+	display:none;
+	position:absolute;
+	float:left;
+	background:#FFF;
+	border:1px solid #777;
+	border-width:1 2 2 1px;
+}
+
+.dropr ul ul li:hover , .dropr ul ul li.over { 
+	background:#DDD;
+}
+
+.dropr li:hover ul, .dropr li.over ul { 
+	display:block;
+	background:#FFF;
+}
+
+
+/***********************************       Sprites **/
+
+
+
+/* Icon sprites */
+.icon {
+    margin:              0;
+    padding:             0 !important;
+    width:               16px;
+    height:              16px;
+    background-image:    url('images/sprites.png') !important;
+    background-repeat:   no-repeat !important;
+    background-position: top left !important;
+}
+
+.ic_chart { background-position: 0 0 !important; }
+.ic_home { background-position: 0 -16 !important; }
+.ic_refresh{ background-position: 0 -32px !important; }
+.ic_server { background-position: 0 -48px !important; }
+.ic_files { background-position: 0 -64px !important; }
+.ic_help{ background-position: 0 -80px !important; }
+.ic_tabgo { background-position: 0 -96px !important; }
+.ic_clock { background-position: 0 -112px !important; }
+.ic_conns { background-position: 0 -128px !important; }
+.ic_chartb { background-position: 0 -144px !important; }
+/*
+.ic_bd_deltbl { background-position: 0 -160px !important; }
+.ic_bd_drop { background-position: 0 -176px !important; }
+.ic_bd_edit { background-position: 0 -192px !important; }
+.ic_b_deltbl { background-position: 0 -208px !important; }
+.ic_bd_empty { background-position: 0 -224px !important; }
+.ic_bd_export { background-position: 0 -240px !important; }
+.ic_bd_firstpage { background-position: 0 -256px !important; }
+.ic_bd_ftext { background-position: 0 -272px !important; }
+.ic_bd_index { background-position: 0 -288px !important; }
+*/

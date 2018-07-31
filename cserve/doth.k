@@ -234,12 +234,14 @@ getMenu:{
 / ############ pages - dictionary holds page name to function mapping #############################	
 
 pageDict:()!();
+
 / return the HTML for this link or null if no page found
 getPage:{ [pagename] 
 	logg "pagename = ",pagename;
-	ttmp:{$[0N=a:*: &: "?"=x; (""; `$x); ((a+1)_x; `$x@ !:a)]}@pagename;
-	logg "  keypage = ",($:ttmp[1]),/ "  args = ",$:ttmp[1];
-	$[100h=@:page:pageDict[ttmp[1]]; ,/htmlForDataTable@page@parseQ@ttmp[0]; ""] };
+	ttmp:getPageParamPair@pagename;
+    logg "ttmp= ",.Q.s ttmp;
+	logg "  keypage = ",($:ttmp 0),/ "  args = ",$:ttmp 0;
+	$[100h=@:page:pageDict[ttmp 0]; ,/htmlForDataTable@page@parseQ@ttmp 1; ""] };
 	
 / the index page
 pageDict[`$"index.qhtml"]:{  [args]
@@ -301,9 +303,12 @@ pageDict[`$"i.qhtml"]:{ [args]
 
 / ############ bringing it all together
 
+getPageParamPair:{$[0N=a:*: &: "?"=x; (`$x;""); (`$x@ !:a;(a+1)_x)]};
+
 .z.ph:{
   isHtml:{".html" ~ x (-1 + #:x) - |: !: 5};
 	x:uh$[@x;x;*x];
+    pp:@[getPageParamPair;x;(`;"")];
 	$[LOGQUERIES;1 "\n----.z.ph ",.Q.s x; ::];
 	doFrameset:{hy[`htm]FRAMESET};
 	$[~#x; doFrameset[x]
@@ -311,9 +316,9 @@ pageDict[`$"i.qhtml"]:{ [args]
   ".gjs?"~5#x; formatGoogVis[5_x]
   "?]"~2#x; getVarAsHTML[2_x; 0b]     / raw result for ajax tables
   "?"=*x ; hy[`htm]htmlForDataTable@getVarAsHTML[1_x; 0b]
+  #r:@[1::;0N!`$":",p:HOME,"/",$pp 0;""]; $[isHtml[$pp 0]; hy; CACHEDHEADER] [0N!`$(1+x?".")_$pp 0; "c"$r]
   ~: ""~dynaPage:getPage[x]; hy[`htm]  dynaPage / if in dictionary of dynamic pages return result
   "?"in x; @[{hy[t]@`/:tx[t:`$-3#n#x]@ .h.RUNNER (1+n:x?"?")_x};x;he]
-  #r:@[1::;`$":",p:HOME,"/",x;""]; $[isHtml[x]; hy; CACHEDHEADER] [`$(1+x?".")_x; "c"$r]
     hn["404 Not Found";`txt]p,": not found"]};
 
  

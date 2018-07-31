@@ -48,6 +48,8 @@ Double-click to zoom back out. Change the number and hit enter to adjust the ave
 <script type="text/javascript">
 
 
+
+	document.getElementById("query").value = decodeURIComponent(window.location.search.substring(1));
 	var myCodeMirror = CodeMirror.fromTextArea(document.getElementById("query"), {
         lineNumbers: true,
         matchBrackets: true,

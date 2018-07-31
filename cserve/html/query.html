@@ -66,6 +66,7 @@
 	};
 
 
+	document.getElementById("query").value = decodeURIComponent(window.location.search.substring(1));
 	var myCodeMirror = CodeMirror.fromTextArea(document.getElementById("query"), {
         lineNumbers: true,
         matchBrackets: true,

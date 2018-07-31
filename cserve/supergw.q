@@ -55,6 +55,7 @@
 
 sys:{system 0N!"l ",x};
 sys each ("html.q";"doth.k";"cserve.q");
+.h.RUNNER:.supergw.smartEval;
 X:(::;::);
 .z.pg:{X::X,enlist x; .supergw.smartEval x};
 .supergw.refreshMetaData[];

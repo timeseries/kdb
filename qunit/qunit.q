@@ -138,6 +138,11 @@ assertThrows:{ [func; arg; exceptionLike; msg]
 // @return actual object
 assertTrue:{ [actual; msg]  assertThat[actual;=;1b; msg]};
 
+// assert that actual is false
+// @param msg Description of this test or related message
+// @return actual object
+assertFalse:{[actual; msg]  assertThat[actual;=;0b; msg]};
+
 / Run all tests in selected namespaces, return table of pass/fails/timings.
 / @param nsList symbol list of namespaces that contains test e.g. `.mytests`yourtests
 / @return a table containing one row for each test, detailing if it passed/failed.

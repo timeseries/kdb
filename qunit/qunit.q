@@ -33,6 +33,7 @@ ar:EMPTYAR; / holder for result of last assertion
 mocks:{x!x}enlist (::); / dictionary from mock names to their original value etc.
 unsetMocks:`$(); / list of variables that are mocked but were unset beforehand
 
+l:("  ";"   "); / stores log entries to allow generating HTML report if required.
 lg:{a:string[.z.t],$[type[x]=98h; "\r\n"; "  "],$[type[x] in 10 -10h; x; .Q.s x],"\r\n"; l::l,enlist a; 1 a; x};
 
 // Assert that the relation between expected and actual value holds
@@ -259,6 +260,7 @@ removeVar:{ [name]
     @[ {n:` vs x; ![`$".",string n 1;();0b;enlist n 2]}; name; `]; };
 
 / Reset any variables that were mocked
+/ @param names list of variables to be reset or if unspecified, reset them all.
 / @return the list of variables unmocked.
 reset:{ [names]
     / if no arg, then remove all variables

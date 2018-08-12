@@ -11,6 +11,9 @@
 / - App/Proc uniquely identify a data source and are interchangeable.
 /   env.version should be rarely changed and cannot easily be mixed within one call to discourage such use.
 
+/ © TimeStored - Free for non-commercial use.
+/ License: Attribution-NonCommercial-ShareAlike 2.0 UK: England & Wales (CC BY-NC-SA 2.0 UK) 
+
 / @TODO multi-query formats
 / @TODO parse multi-statements to pull out selects
 / @TODO HDB/RDB stitching

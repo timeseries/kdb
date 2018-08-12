@@ -5,6 +5,9 @@
 /        Calling .kdb.XXX calls, and sending those calls to underlying services
 /        Running queries, that appear to hit local RDBs but is automatically sent remote.
 
+/ © TimeStored - Free for non-commercial use.
+/ License: Attribution-NonCommercial-ShareAlike 2.0 UK: England & Wales (CC BY-NC-SA 2.0 UK) 
+
 / filter used to check that this function should be ran locally rather than sent elsewhere
 .supergw.runLocalFilter:{0<count x ss ".kdb."};
 .supergw.isQry:{ [parsedQ] $[5=count parsedQ;$[value["?"]~parsedQ 0;-11h~type parsedQ 1;0b];0b]};

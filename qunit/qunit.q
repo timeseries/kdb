@@ -9,6 +9,7 @@
 / @author TimeStored.com
 / @website http://www.timestored.com/kdb-guides/kdb-regression-unit-tests
 / © TimeStored - Free for non-commercial use.
+/ License: Attribution-NonCommercial-ShareAlike 2.0 UK: England & Wales (CC BY-NC-SA 2.0 UK) 
 
 / @TODO mocking projections are broken, add test and fix.
 

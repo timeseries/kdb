@@ -1,0 +1,75 @@
+body#listing { margin:0 5px;
+background: #EEF; 
+font-size:80%;  }
+
+h1#logo { text-align:center; 
+font-size:2.5em; 
+color:#024C7E;
+margin: 0 0 10px;
+padding:0}
+
+#shortcuts {
+ text-align:center; 
+}
+#shortcuts a {
+ margin: 5px;
+}
+
+#logo span { color:#958600; }
+
+a,a:hover,a:focus,a:active,a:active{
+	text-decoration: none;
+	color:#111;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+ul{ 
+margin: 0;
+padding: 5px;
+}
+
+.treeview ul{ /*CSS for Simple Tree Menu*/
+margin: 0;
+padding: 0;
+}
+
+.treeview li{ /*Style for LI elements in general (excludes an LI that contains sub lists)*/
+background: url(images/var.gif) no-repeat left center;
+list-style-type: none;
+padding-left: 22px;
+margin-bottom: 3px;
+}
+
+
+.treeview li.tbl{ 
+background: url(images/tbl.gif) no-repeat left center;
+}
+
+.treeview li.vw{ 
+background: url(images/view.png) no-repeat left center;
+}
+.treeview li.func{ 
+background: url(images/function.png) no-repeat left center;
+}
+
+.treeview li.var{ 
+background: url(images/var.gif) no-repeat left center;
+}
+
+.treeview li.submenu{ /* Style for LI that contains sub lists (other ULs). */
+background: url(closed.gif) no-repeat left 1px;
+cursor: hand !important;
+cursor: pointer !important;
+}
+
+
+.treeview li.submenu ul{ /*Style for ULs that are children of LIs (submenu) */
+display: none; /*Hide them by default. Don't delete. */
+}
+
+.treeview .submenu ul li{ /*Style for LIs of ULs that are children of LIs (submenu) */
+cursor: default;
+}

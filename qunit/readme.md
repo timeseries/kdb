@@ -164,6 +164,31 @@ The result of running tests is a table with one row for each test. The table wil
     maxMem - The maximium memory in bytes that the test is allowed to run, else it would fail.
 
 
+Mock Framework
+-----------------------------------------------
+
+Sometimes you want to set a value but have that variable restored to it's original value when the test or namespace of tests are complete. Qunit provides a mocking framework to allow this. e.g.
+
+```
+q).a.b:11
+q).a.f:{x+10}
+q).qunit.mock[`.a.b;22]
+`.a.b
+q).qunit.mock[`.a.f;{13}]
+q).a.b
+22
+q).a.f 99
+13
+q).qunit.reset[]
+`.a.b`.a.f
+q).a.b
+11
+q).a.f 99
+109
+```
+
+By having the reset in your tearDown/afterNamespace, it ensures values are plaed back to their original value and that later tests won't be impacted.
+
 Parameters
 -----------------------------------------------
 

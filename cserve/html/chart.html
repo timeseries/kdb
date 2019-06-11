@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7; IE=EmulateIE9">
+    <title>Time series graph</title>
+    <!--[if IE]>
+    <script type="text/javascript" src="excanvas.js"></script>
+    <![endif]-->
+<style type="text/css">@import 'style.css';</style>
+<style type="text/css">@import 'codemirror.css';</style>
+<script type="text/javascript" src="codemirror.js"></script>
+<script type="text/javascript" src="dygraph-combined.js"></script>
+</head>
+<body id='chart'>
+
+
+<h1>Charts</h1>
+
+<div id="inner"><ul id="tablist"><li><a href="chart.html" id="current">Time Series charts</a></li><li><a href="chart-online.html">Online vis charts</a></li></ul></div>
+
+<div id='explain'><p>(Mouse over to highlight individual values. Click and drag to zoom. 
+Double-click to zoom back out. Change the number and hit enter to adjust the averaging period.)</p></div>
+
+<div id="graphout"style="padding:0;"><div id="graphdiv" style="width:720px; height:330px; margin:0; padding:0;"></div></div>
+
+
+
+<form id='myForm' class='boxy' name="myForm" action="err.asp" onsubmit="redrawChart(); return false" method="post">
+<label FOR="query">Query: 
+	<textarea rows="2" cols="20"  name="query" id="query" style="width:530px">([] .z.d+til 400; rand[3]*cos rand[3.0]*a; sin a:0.03*til 400)</textarea>
+</label>
+<br/>
+<input type="submit" value="Submit">
+
+<label FOR="autorefresh">Autorefresh 
+<input type="checkbox" id="autorefresh" name="autorefresh" value="autorefresh" onclick='autoRefresh()'>
+</label>
+
+	<div style="float:right;">
+		<label>Download</label> 
+		<button type="button" onmouseup="download('csv')">CSV</button>
+		<button type="button" onmouseup="download('xml')">XML</button>
+	</div>
+</form>
+
+<div class='footer'><p><a href='http://www.timestored.com/kdb-guides/kdb-keyword-reference'>Function List</a> | <a href='http://www.timestored.com/kdb-guides/'>kdb Tutorials</a></p></div>
+
+<script type="text/javascript">
+
+
+
+	document.getElementById("query").value = decodeURIComponent(window.location.search.substring(1));
+	var myCodeMirror = CodeMirror.fromTextArea(document.getElementById("query"), {
+        lineNumbers: true,
+        matchBrackets: true,
+        indentUnit: 4,
+		tabMode: "default",
+        mode: "text/x-plsql"
+      });
+	  
+function redrawChart()
+{
+ myCodeMirror.save();
+ g = new Dygraph(
+
+    // containing div
+    document.getElementById("graphdiv"),
+	
+    // CSV or path to a CSV file.
+    "t.csv?" + document.getElementById("query").value,
+          {
+            title: 'Time series graph',
+            legend: 'always',
+            labelsDivStyles: { 'textAlign': 'right' }
+          }
+  );
+};
+
+function autoRefresh() {
+	if(document.getElementById("autorefresh").checked) {
+		redrawChart();
+		setTimeout("autoRefresh()",3000);
+	}
+}
+
+
+	function download(type) {
+		myCodeMirror.save();
+		window.location.href = 'file.' + type + '?'+document.getElementById("query").value;
+	};
+
+redrawChart()
+</script>
+
+</body>
+</html>

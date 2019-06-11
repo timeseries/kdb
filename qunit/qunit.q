@@ -112,6 +112,16 @@ assertThrows:{ [func; arg; exceptionLike; msg]
 // @return actual object
 assertTrue:{ [actual; msg]  assertThat[actual;=;1b; msg]};
 
+// assert that actual is empty i.e. count is zero.
+// @param msg Description of this test or related message
+// @return actual object
+assertEmpty:{ [actual; msg]  assertThat[count actual;=;0; msg]};
+
+// assert that actual is NOT empty i.e. count is greater than zero.
+// @param msg Description of this test or related message
+// @return actual object
+assertNotEmpty:{ [actual; msg]  assertThat[count actual;>;0; msg]};
+
 / Run all tests in selected namespaces, return table of pass/fails/timings.
 / @param nsList symbol list of namespaces that contains test e.g. `.mytests`yourtests
 / @return a table containing one row for each test, detailing if it passed/failed.

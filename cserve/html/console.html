@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>qConsole</title>
+	<link rel="shortcut icon" href="qconsole.ico"/>
+    <script src="https://code.jquery.com/jquery-1.7.2.min.js"></script>
+    <script src="https://unpkg.com/jquery.terminal/js/jquery.mousewheel-min.js"></script>
+	<script src="https://cdn.rawgit.com/jcubic/jquery.terminal/devel/js/jquery.terminal.min.js"></script>
+	<link href="https://cdn.rawgit.com/jcubic/jquery.terminal/devel/css/jquery.terminal.min.css" rel="stylesheet"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<body id='qconsole'>
+
+<script type="text/javascript">
+
+
+	
+function sendQuery(txt,term)
+ {
+	// prevent wasted calls
+	if(txt.trim().length == 0) {
+		return;
+	}
+	url = '/?['+escape(txt);
+   if (window.XMLHttpRequest) {
+	   req = new XMLHttpRequest();
+	   req.onreadystatechange = function() {queryDone(txt,term);};
+	   req.open("GET", url, true);
+	   req.send(null);
+   // IE/Windows ActiveX version
+   } else if (window.ActiveXObject) {
+	   req = new ActiveXObject("Microsoft.XMLHTTP");
+	   if (req) {
+		   req.onreadystatechange = function() {queryDone(txt,term);};
+		   req.open("GET", url, true);
+		   req.send();
+	   }
+   }
+};
+
+function queryDone(txt, term) {
+	// only if req is "loaded"
+	if (req.readyState == 4) {
+		// only if "OK"
+		t = "";
+		if (req.status == 200 || req.status == 304) {
+			t = req.responseText;
+		} else {
+			t = req.responseText;
+		}
+		// KDB sends an extra line ending
+		if(t.length > 2) {
+			var lastChar = t[t.length -1];
+			if(lastChar == '\n') {
+				t = t.substring(0,t.length -1);
+			}
+		}
+		if(t[0] == "'") {
+			term.error(t);
+		} else {
+			term.echo(t, {formatters: false});
+		}
+	}
+	window.localStorage.setItem('cohistory', JSON.stringify(term.export_view()));
+};
+
+	
+window.onload = function () { 
+	var position;
+	var timer;
+	parenthesesHighlighterKeypress = function(e) {
+			var term = this;
+			if (e.key == ')') {
+				setTimeout(function() {
+					position = term.get_position();
+					var command = term.before_cursor();
+					var count = 1;
+					var close_pos = position - 1;
+					var c;
+					while (count > 0) {
+						c = command[--close_pos];
+						if (!c) {
+							return;
+						}
+						if (c === '(') {
+							count--;
+						} else if (c == ')') {
+							count++;
+						}
+					}
+					if (c == '(') {
+						clearTimeout(timer);
+						setTimeout(function() {
+							term.set_position(close_pos);
+							timer = setTimeout(function() {
+								term.set_position(position)
+								position = false;
+							}, 200);
+						}, 0);
+					}
+				}, 0);
+			} else {
+				position = false;
+			}
+		};
+
+		
+		// taken from examples: https://terminal.jcubic.pl/examples.php
+		function balance(code) {
+			// tokenize from previous example
+			var tokens = tokenize(code);
+			var count = 0;
+			var token;
+			var i = tokens.length;
+			while ((token = tokens[--i])) {
+				if (token.token === '(') {
+					count++
+				} else if (token.token == ')') {
+					count--;
+				}
+			}
+			return count;
+		}
+		
+		
+				
+		// copy from LIPS source code
+		var pre_parse_re = /("(?:\\[\S\s]|[^"])*"|\/(?! )[^\/\\]*(?:\\[\S\s][^\/\\]*)*\/[gimy]*(?=\s|\(|\)|$)|;.*)/g;
+		var tokens_re = /("(?:\\[\S\s]|[^"])*"|\/(?! )[^\/\\]*(?:\\[\S\s][^\/\\]*)*\/[gimy]*(?=\s|\(|\)|$)|\(|\)|'|"(?:\\[\S\s]|[^"])+|(?:\\[\S\s]|[^"])*"|;.*|(?:[-+]?(?:(?:\.[0-9]+|[0-9]+\.[0-9]+)(?:[eE][-+]?[0-9]+)?)|[0-9]+\.)[0-9]|\.|,@|,|`|[^(\s)]+)/gim;
+		// ----------------------------------------------------------------------
+		function tokenize(str) {
+			var count = 0;
+			var offset = 0;
+			var tokens = [];
+			str.split(pre_parse_re).filter(Boolean).forEach(function(string) {
+				if (string.match(pre_parse_re)) {
+					if (!string.match(/^;/)) {
+						var col = (string.split(/\n/), [""]).pop().length;
+						tokens.push({
+							token: string,
+							col,
+							offset: count + offset,
+							line: offset
+						});
+						count += string.length;
+					}
+					offset += (string.match("\n") || []).length;
+					return;
+				}
+				string.split('\n').filter(Boolean).forEach(function(line, i) {
+					var col = 0;
+					line.split(tokens_re).filter(Boolean).forEach(function(token) {
+						var line = i + offset;
+						var result = {
+							col,
+							line,
+							token,
+							offset: count + line
+						};
+						col += token.length;
+						count += token.length;
+						tokens.push(result);
+					});
+				});
+			});
+			return tokens;
+		}
+		
+		
+    var keywords = [
+		'select', 'from', 'where', 'by', 
+        '.Q.addmonths', '.Q.addr', '.Q.host', '.Q.chk', '.Q.cn', '.Q.pn', '.Q.D', '.Q.dd', '.Q.dsftg', '.Q.en', '.Q.fc', '.Q.fk', '.Q.fmt', '.Q.fs', '.Q.ft', '.Q.gc', '.Q.hdpf[historicalport;directory;partition;`p#field]', '.Q.ind', '.Q.P', '.Q.par[dir;part;table]', '.Q.PD', '.Q.pd', '.Q.pf', '.Q.PV', '.Q.pv', '.Q.qp', '.Q.qt', '.Q.s', '.Q.ty', '.Q.u', '.Q.v', '.Q.V', '.Q.view', 'all', 'bin', 'cross', 'count', 'differ', 'each', 'eval', 'except', 'exp', 'fby', 'fills', 'fkeys', 'flip', 'getenv', 'group', 'gtime', 'hcount', 'hsym', 'iasc', 'idesc', 'in', 'inter', 'insert', 'inv', 'key', 'keys', 'ltime', 'max', 'maxs', 'mcount', 'mdev', 'med', 'meta', 'mmax', 'mmu', 'mod', 'msum', 'neg', 'not', 'null', 'or', 'over', 'parse', 'peach', 'prd', 'rand', 'rank', 'ratios', 'raze', 'read0', 'read1', 'reciprocal', 'reverse', 'rload', 'rotate', 'save', 'scan', 'set', 'setenv', 'show', 'signum', 'ss', 'ssr', 'like', 'string', 'sublist', 'sv', 'system', 'tables', 'til', 'type', 'ungroup', 'union', 'upsert', 'value', 'var', 'view', 'views', 'vs', 'where', 'within', 'wj', 'wsum', 'xasc', 'xbar', 'xcol', 'xcols', 'xexp', 'xgroup', 'xkey', 'xprev', 'xrank', '0:', '1:', '2:', '1', '2', 'lj', 'pj', 'ij', 'ej', 'uj', 'aj', 'select', 'update', 'delete', 'lower', 'upper', 'trim', 'rtrim', 'ltrim', 'cols', 'sin', 'asin', 'cos', 'acos', 'tan', 'atan', 'log', 'sqrt', 'abs', 'min', 'sum', 'last', 'wavg', 'hdel', 'enlist', 'ceiling', 'floor', 'any1'];
+	var keywordsSet = new Set(keywords);
+	var myMap = new Map();
+	
+// disabled as it severely degrades the speed of backspace deleting	
+//    $.terminal.defaults.formatters.push(function(string) {
+//        return string.split(/((?:\s|&nbsp;)+)/).map(function(string) {
+//            if (keywordsSet.has(string)) {
+//                return '[[b;#CCC;]' + string + ']';
+//            } else {
+//                return string;
+//            }
+//        }).join('');
+//    });
+	
+    var formatters = [$.terminal.defaults.formatters];
+    var term = $('body').terminal(function(command, term) {
+		sendQuery(command, term);
+    }, {
+		prompt: 'q)',
+		name: 'qk',
+		completion: keywords,
+		greetings:"",
+		outputLimit:10200,
+		keydown: function() {
+			if (position) {
+				this.set_position(position);
+				position = false;
+			}
+		},
+		keypress:parenthesesHighlighterKeypress,
+		// This allows multi-line input when paranthesis are not ended
+		keymap: {
+			ENTER: function(e, original) {
+				if (balance(this.get_command()) === 0) {
+					original();
+				} else {
+					this.insert('\n');
+				}
+			}
+		}
+    });
+	
+	var cohistory = window.localStorage.getItem('cohistory')
+	if(cohistory != null) {
+		console.log(cohistory);
+		var a = JSON.parse(cohistory);
+		term.import_view(JSON.parse(cohistory));
+		term.echo("q) // Welcome to CloudKDB v0.1 Beta");
+	}
+}
+
+</script>
+
+</body>
+</html>

@@ -315,6 +315,7 @@ getPageParamPair:{$[0N=a:*: &: "?"=x; (`$x;""); (`$x@ !:a;(a+1)_x)]};
   x~,"?"; {hy[`htm] TREEHEADER,getMenu[],TREEFOOTER}[]
   ".gjs?"~5#x; formatGoogVis[5_x]
   "?]"~2#x; getVarAsHTML[2_x; 0b]     / raw result for ajax tables
+  "?["~2#x; hy[`htm] @[{.Q.s .h.RUNNER x};2 _ x;{"'",x,"\r\n"}]  / raw result for console
   "?"=*x ; hy[`htm]htmlForDataTable@getVarAsHTML[1_x; 0b]
   #r:@[1::;0N!`$":",p:HOME,"/",$pp 0;""]; $[isHtml[$pp 0]; hy; CACHEDHEADER] [0N!`$(1+x?".")_$pp 0; "c"$r]
   ~: ""~dynaPage:getPage[x]; hy[`htm]  dynaPage / if in dictionary of dynamic pages return result
